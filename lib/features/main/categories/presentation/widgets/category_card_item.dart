@@ -1,0 +1,89 @@
+
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:e_commerce_app/core/resources/color_manager.dart';
+import 'package:e_commerce_app/core/resources/styles_manager.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+class CategoryCardItem extends StatelessWidget {
+  final String title;
+  final String image;
+  final Function navigation;
+
+  const CategoryCardItem(this.title, this.image, this.navigation, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Create a container for the category card
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      // Height of the card set with fixed size to make all image same size but it can be deleted without affecting the code
+      height: 100,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          children: [
+            // Background image for the category
+            CachedNetworkImage(
+              fit: BoxFit.fill,
+              imageUrl: image,
+              width: double.infinity,
+              placeholder: (context, url) =>
+              const Center(child: CircularProgressIndicator()),
+              errorWidget: (context, url, error) =>
+              const Center(child: Icon(Icons.error)),
+
+            ),
+
+            // Overlay with category title and button
+            Positioned.fill(
+                child: Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 18, vertical:8),
+              child: Row(
+                children: [
+                  Expanded(
+                      child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      // Category title
+                      Text(
+                        title,
+                        style: getBoldStyle(
+                            color: ColorManager.textColor,
+                            fontSize: 16.sp),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      // Shop Now button
+                      SizedBox(
+                        width: 110.w,
+                        height: 35.h,
+                        child: ElevatedButton(
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                                fixedSize: Size(120.w, 30.h),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 5.w, vertical: 0),
+                                backgroundColor: ColorManager.primary,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.r))),
+                            child: Text(
+                              "Shop Now",
+                              style: getRegularStyle(color: ColorManager.white),
+                            )),
+                      )
+                    ],
+                  )),
+                  const Spacer()
+                ],
+              ),
+            ))
+          ],
+        ),
+      ),
+    );
+  }
+}
