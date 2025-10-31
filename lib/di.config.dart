@@ -65,6 +65,15 @@ import 'features/main/home/data/repositories/home_repo_impl.dart' as _i988;
 import 'features/main/home/domain/repositories/home_repo.dart' as _i125;
 import 'features/main/home/domain/use_cases/home_use_cases.dart' as _i763;
 import 'features/main/home/presentation/Bloc/home_bloc.dart' as _i31;
+import 'features/main/profile/data/data_sources/remote/profile_remote_ds.dart'
+    as _i543;
+import 'features/main/profile/data/data_sources/remote/profile_remote_ds_impl.dart'
+    as _i649;
+import 'features/main/profile/data/repositories/profile_repo_impl.dart'
+    as _i674;
+import 'features/main/profile/domain/repositories/profile_repo.dart' as _i639;
+import 'features/main/profile/domain/use_cases/profile_use-case.dart' as _i549;
+import 'features/main/profile/presentation/Bloc/profile_bloc.dart' as _i157;
 import 'features/product_details/data/data_sources/remote/product_details_ds.dart'
     as _i868;
 import 'features/product_details/data/data_sources/remote/product_details_ds_impl.dart'
@@ -115,6 +124,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i893.CategoriesRemoteDsImpl(gh<_i237.ApiManager>()));
     gh.factory<_i351.CartRemoteDs>(
         () => _i20.CartRemoteDsImpl(gh<_i237.ApiManager>()));
+    gh.factory<_i543.ProfileRemoteDs>(
+        () => _i649.ProfileRemoteDsImpl(gh<_i237.ApiManager>()));
     gh.factory<_i68.CategoriesRepo>(
         () => _i809.CategoriesRepoImpl(gh<_i823.CategoriesRemoteDs>()));
     gh.factory<_i416.AuthRepo>(
@@ -152,6 +163,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i442.GetFavoriteProductUseCase(gh<_i466.FavoriteRepo>()));
     gh.factory<_i493.RemoveFromFavorite>(
         () => _i493.RemoveFromFavorite(gh<_i466.FavoriteRepo>()));
+    gh.factory<_i639.ProfileRepo>(
+        () => _i674.ProfileRepoImpl(gh<_i543.ProfileRemoteDs>()));
     gh.factory<_i466.ProductDetailsBloc>(
         () => _i466.ProductDetailsBloc(gh<_i761.ProductDetailsUseCase>()));
     gh.factory<_i529.AddToCartUseCase>(
@@ -182,11 +195,15 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i316.RemoveCartUseCase>(),
           gh<_i716.UpdateCartUseCase>(),
         ));
+    gh.factory<_i549.ProfileUseCase>(
+        () => _i549.ProfileUseCase(gh<_i639.ProfileRepo>()));
     gh.factory<_i491.AddToFavoriteBloc>(() => _i491.AddToFavoriteBloc(
           gh<_i82.AddToFavoriteUseCase>(),
           gh<_i493.RemoveFromFavorite>(),
           gh<_i442.GetFavoriteProductUseCase>(),
         ));
+    gh.factory<_i157.ProfileBloc>(
+        () => _i157.ProfileBloc(gh<_i549.ProfileUseCase>()));
     return this;
   }
 }

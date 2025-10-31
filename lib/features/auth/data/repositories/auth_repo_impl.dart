@@ -33,6 +33,9 @@ class AuthRepoImpl implements AuthRepo{
       var result = await authRemoteDs.logIn(email: email,password: password);
       var prefs=await SharedPrefsHelper.getInstance();
       await prefs.setValue<String>("token", result.token??"");
+      await prefs.setValue<String>("name", result.user?.name??"");
+      await prefs.setValue<String>("email", result.user?.email??"");
+
       return Right(result);
     }catch(e){
       return Left(RemoteFailures(e.toString()));

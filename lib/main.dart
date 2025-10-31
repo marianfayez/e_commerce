@@ -7,27 +7,22 @@ import 'package:e_commerce_app/features/product_screen/presentation/bloc/product
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:loader_overlay/loader_overlay.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-void main()async{
-
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  configureDependencies() ;
+  configureDependencies();
 
-  runApp(
-
-      MultiBlocProvider(providers: [
-        BlocProvider(create: (_) => getIt<CartBloc>()..add(GetCartEvent())),
-         BlocProvider(create: (_) => getIt<ProductScreenBloc>()),
-        BlocProvider(create: (_) => getIt<AddToFavoriteBloc>()..add(GetFavoriteProductEvent())),
-
-      ],
-      child: MyApp()));
+  runApp(MultiBlocProvider(providers: [
+    BlocProvider(create: (_) => getIt<CartBloc>()..add(GetCartEvent())),
+    BlocProvider(create: (_) => getIt<ProductScreenBloc>()),
+    BlocProvider(
+        create: (_) =>
+            getIt<AddToFavoriteBloc>()..add(GetFavoriteProductEvent())),
+  ], child: MyApp()));
 }
 
-class MyApp extends StatelessWidget{
+class MyApp extends StatelessWidget {
   final _appRouter = AppRouter();
 
   @override
@@ -36,11 +31,9 @@ class MyApp extends StatelessWidget{
         designSize: Size(430, 932),
         minTextAdapt: true,
         splitScreenMode: true,
-        builder: (context, child)=> MaterialApp.router(
-          routerConfig: _appRouter.config(),
-          debugShowCheckedModeBanner: false,
-        ));
+        builder: (context, child) => MaterialApp.router(
+              routerConfig: _appRouter.config(),
+              debugShowCheckedModeBanner: false,
+            ));
   }
-
-
 }
