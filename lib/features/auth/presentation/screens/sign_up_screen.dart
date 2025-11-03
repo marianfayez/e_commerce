@@ -2,6 +2,7 @@ import 'package:auto_route/annotations.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:e_commerce_app/core/api/api_manager.dart';
 import 'package:e_commerce_app/core/resources/assets.gen.dart';
+import 'package:e_commerce_app/core/resources/cache_helper.dart';
 import 'package:e_commerce_app/core/resources/color_manager.dart';
 import 'package:e_commerce_app/core/resources/styles_manager.dart';
 import 'package:e_commerce_app/core/routes/auto_route.dart';
@@ -60,7 +61,11 @@ class SignUpScreen extends StatelessWidget {
                       ],
                     ));
           } else if (state.requestState == RequestState.success) {
-            context.router.replaceAll([const MainRoute()]);
+
+
+              context.router.replaceAll([const MainRoute()]);
+
+
           }
         },
         builder: (context, state) {
@@ -135,6 +140,10 @@ class SignUpScreen extends StatelessWidget {
                         controller: mobileController,
                         validation: AppValidators.validatePhoneNumber,
                         textInputType: TextInputType.phone,
+                        onTap: ()async{
+                          final prefs = await SharedPrefsHelper.getInstance();
+                          await prefs.setValue<String>('phone', mobileController.text);
+                        },
                       ),
                       SizedBox(
                         height: 50.h,

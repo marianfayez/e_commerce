@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:e_commerce_app/core/failuers/failuers.dart';
 import 'package:e_commerce_app/features/auth/data/models/auth_model.dart';
-import 'package:e_commerce_app/features/auth/data/models/sign_up_request_model.dart';
 import 'package:e_commerce_app/features/main/profile/domain/repositories/profile_repo.dart';
 import 'package:injectable/injectable.dart';
 
@@ -12,5 +11,5 @@ class ProfileUseCase {
 
   ProfileUseCase(this.profileRepo);
 
-  Future<Either<RouteFailures,AuthModel>>call()=>profileRepo.Profile();
+  Future<Either<RouteFailures,AuthModel>>call()=>profileRepo.profile();
 }

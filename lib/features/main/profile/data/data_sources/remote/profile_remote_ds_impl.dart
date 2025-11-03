@@ -6,26 +6,27 @@ import 'package:e_commerce_app/features/auth/data/data_sources/remote/auth_remot
 import 'package:e_commerce_app/features/auth/data/models/auth_model.dart';
 import 'package:e_commerce_app/features/auth/data/models/sign_up_request_model.dart';
 import 'package:e_commerce_app/features/main/profile/data/data_sources/remote/profile_remote_ds.dart';
+import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
 import 'package:injectable/injectable.dart';
 
 @Injectable(as: ProfileRemoteDs)
-class ProfileRemoteDsImpl implements ProfileRemoteDs{
-
+class ProfileRemoteDsImpl implements ProfileRemoteDs {
   ApiManager apiManager;
   ProfileRemoteDsImpl(this.apiManager);
 
   @override
-  Future<AuthModel> profile() async{
+  Future<AuthModel> profile() async {
     try {
       final prefs = await SharedPrefsHelper.getInstance();
 
       final token = prefs.getValue<String>('token');
       final name = prefs.getValue<String>('name');
       final email = prefs.getValue<String>('email');
+      final phone = prefs.getValue<String>('phone');
       if (name == null || email == null || token == null) {
         throw Exception('User data not found in local storage');
       }
-      final user = User(name: name, email: email);
+      final user = User(name: name, email: email, phone: phone);
       final authModel = AuthModel(
         message: 'Profile loaded successfully (local)',
         user: user,
@@ -39,5 +40,51 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs{
     }
   }
 
+  @override
+  Future<AddressModel> addAddress(
+      {String? name, String? details, String? phone, String? city}) async {
+    try {
+      print("📦 SENDING DATA TO API: name=$name, details=$details, phone=$phone, city=$city");
 
+      final prefs = await SharedPrefsHelper.getInstance();
+      final token = prefs.getValue<String>('token');
+
+      var response = await apiManager.postData(EndPoints.addAddress, data: {
+        "name": name,
+        "details": details,
+        "phone": phone,
+        "city": city
+      }, headers: {
+        "token": token,
+      });
+
+      final addressModel = AddressModel.fromJson(response.data);
+      print("✅ RESPONSE PARSED: ${addressModel.data??""}"); // هتطلعلك اسم أول عنوان
+      return addressModel;
+    } on DioException catch (e) {
+      final errorMessage = e.error?.toString() ?? 'Unknown error occurred';
+      throw Exception(
+          errorMessage); // or rethrow with ServerFailure if using Either
+    }
+  }
+
+  @override
+  Future<AddressModel> getAddresses() async{
+    try {
+      final prefs = await SharedPrefsHelper.getInstance();
+      final token = prefs.getValue<String>('token');
+
+      var response = await apiManager.getData(endPoint: EndPoints.addAddress, headers: {
+        "token": token,
+      });
+
+      if (response.data is Map<String, dynamic>) {
+        return AddressModel.fromJson(response.data);
+      } else {
+        throw Exception('Invalid response format');
+      }
+    } on DioException catch (e) {
+      throw Exception(e.error?.toString() ?? 'Unknown error occurred');
+    }
+  }
 }

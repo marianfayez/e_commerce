@@ -7,22 +7,51 @@ import 'package:e_commerce_app/features/auth/data/models/auth_model.dart';
 import 'package:e_commerce_app/features/auth/data/models/sign_up_request_model.dart';
 import 'package:e_commerce_app/features/auth/domain/repositories/auth_repo.dart';
 import 'package:e_commerce_app/features/main/profile/data/data_sources/remote/profile_remote_ds.dart';
+import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
 import 'package:e_commerce_app/features/main/profile/domain/repositories/profile_repo.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 @Injectable(as: ProfileRepo)
-class ProfileRepoImpl implements ProfileRepo{
-
+class ProfileRepoImpl implements ProfileRepo {
   ProfileRemoteDs profileRemoteDs;
   ProfileRepoImpl(this.profileRemoteDs);
 
   @override
-  Future<Either<RouteFailures, AuthModel>> Profile() async{
-    try{
+  Future<Either<RouteFailures, AuthModel>> profile() async {
+    try {
       var result = await profileRemoteDs.profile();
       return Right(result);
-    }catch(e){
+    } catch (e) {
+      return Left(RemoteFailures(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<RouteFailures, AddressModel>> addAddress(
+      {required String name,
+      required String details,
+      required String phone,
+      required String city}) async {
+    try {
+      var result = await profileRemoteDs.addAddress(
+        name: name,
+        details: details,
+        phone: phone,
+        city: city,
+      );
+      return Right(result);
+    } catch (e) {
+      return Left(RemoteFailures(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<RouteFailures, AddressModel>> getAddresses() async {
+    try {
+      var result = await profileRemoteDs.getAddresses();
+      return Right(result);
+    } catch (e) {
       return Left(RemoteFailures(e.toString()));
     }
   }

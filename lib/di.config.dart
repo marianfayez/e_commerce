@@ -72,6 +72,8 @@ import 'features/main/profile/data/data_sources/remote/profile_remote_ds_impl.da
 import 'features/main/profile/data/repositories/profile_repo_impl.dart'
     as _i674;
 import 'features/main/profile/domain/repositories/profile_repo.dart' as _i639;
+import 'features/main/profile/domain/use_cases/add_address_use_case.dart'
+    as _i1012;
 import 'features/main/profile/domain/use_cases/profile_use-case.dart' as _i549;
 import 'features/main/profile/presentation/Bloc/profile_bloc.dart' as _i157;
 import 'features/product_details/data/data_sources/remote/product_details_ds.dart'
@@ -167,6 +169,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i674.ProfileRepoImpl(gh<_i543.ProfileRemoteDs>()));
     gh.factory<_i466.ProductDetailsBloc>(
         () => _i466.ProductDetailsBloc(gh<_i761.ProductDetailsUseCase>()));
+    gh.factory<_i1012.AddAddressUseCase>(
+        () => _i1012.AddAddressUseCase(gh<_i639.ProfileRepo>()));
     gh.factory<_i529.AddToCartUseCase>(
         () => _i529.AddToCartUseCase(gh<_i30.ProductRepo>()));
     gh.factory<_i35.GetProductUseCase>(
@@ -202,8 +206,10 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i493.RemoveFromFavorite>(),
           gh<_i442.GetFavoriteProductUseCase>(),
         ));
-    gh.factory<_i157.ProfileBloc>(
-        () => _i157.ProfileBloc(gh<_i549.ProfileUseCase>()));
+    gh.factory<_i157.ProfileBloc>(() => _i157.ProfileBloc(
+          gh<_i549.ProfileUseCase>(),
+          gh<_i1012.AddAddressUseCase>(),
+        ));
     return this;
   }
 }
