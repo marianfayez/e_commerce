@@ -59,7 +59,7 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
       });
 
       final addressModel = AddressModel.fromJson(response.data);
-      print("✅ RESPONSE PARSED: ${addressModel.data??""}"); // هتطلعلك اسم أول عنوان
+      print("✅ RESPONSE PARSED: ${addressModel.data?.first??""}"); // هتطلعلك اسم أول عنوان
       return addressModel;
     } on DioException catch (e) {
       final errorMessage = e.error?.toString() ?? 'Unknown error occurred';

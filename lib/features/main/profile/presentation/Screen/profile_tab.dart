@@ -3,14 +3,16 @@ import 'package:e_commerce_app/core/resources/color_manager.dart';
 import 'package:e_commerce_app/core/resources/constants_manager.dart';
 import 'package:e_commerce_app/core/resources/font_manager.dart';
 import 'package:e_commerce_app/core/resources/styles_manager.dart';
-import 'package:e_commerce_app/core/routes/auto_route.dart';
 import 'package:e_commerce_app/core/routes/auto_route.gr.dart';
 import 'package:e_commerce_app/core/widgets/custom_elevated_button.dart';
 import 'package:e_commerce_app/core/widgets/main_text_field.dart';
 import 'package:e_commerce_app/core/widgets/validators.dart';
 import 'package:e_commerce_app/di.dart';
+import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/Bloc/profile_bloc.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/Bloc/profile_state.dart';
+import 'package:e_commerce_app/features/main/profile/presentation/widgets/showAddAddressSheet.dart';
+import 'package:e_commerce_app/features/main/profile/presentation/widgets/showAddressesDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -24,7 +26,6 @@ class ProfileTab extends StatefulWidget {
 }
 
 class ProfileTabState extends State<ProfileTab> {
-  bool showAddForm = false;
   bool isFullNameReadOnly = true;
   bool isEmailReadOnly = true;
   bool isPasswordReadOnly = true;
@@ -47,10 +48,6 @@ class ProfileTabState extends State<ProfileTab> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("✅ Address added successfully")),
             );
-            context
-                .read<ProfileBloc>()
-                .add(GetAddresses()); // نحدث القائمة بعد الإضافة
-            setState(() => showAddForm = false);
           }
 
           if (state.addAddressRequestState == RequestState.error) {
@@ -223,8 +220,17 @@ class ProfileTabState extends State<ProfileTab> {
                       ),
                     SizedBox(height: 50.h),
                     CustomElevatedButton(
-                      label: 'Add Shipping Address',
-                      onTap: () => showAddAddressSheet(context),
+                      label: (state.addressModel?.data != null &&
+                              state.addressModel!.data!.isNotEmpty)
+                          ? 'Show All Shipping Addresses'
+                          : 'Add Shipping Address',
+                      onTap: () {
+                        if (state.addressModel?.data != null && state.addressModel!.data!.isNotEmpty) {
+                          showAddressesDialog(context,state.addressModel!.data! );
+                        } else {
+                          showAddAddressSheet(context);
+                        }
+                      },
                     ),
                     SizedBox(height: 25.h),
                     CustomElevatedButton(
@@ -250,86 +256,5 @@ class ProfileTabState extends State<ProfileTab> {
     );
   }
 }
-void showAddAddressSheet(BuildContext context) {
-  final nameController = TextEditingController();
-  final detailsController = TextEditingController();
-  final phoneController = TextEditingController();
-  final cityController = TextEditingController();
 
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    builder: (sheetContext) {
-      return Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
-          left: 16,
-          right: 16,
-          top: 24,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              "Add New Address",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: "Name"),
-            ),
-            TextField(
-              controller: detailsController,
-              decoration: const InputDecoration(labelText: "Details"),
-            ),
-            TextField(
-              controller: phoneController,
-              decoration: const InputDecoration(labelText: "Phone"),
-              keyboardType: TextInputType.phone,
-            ),
-            TextField(
-              controller: cityController,
-              decoration: const InputDecoration(labelText: "City"),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.pop(sheetContext),
-                  child: const Text("Cancel"),
-                ),
-                ElevatedButton(
-                  onPressed: () async{
-                    final name = nameController.text.trim();
-                    final details = detailsController.text.trim();
-                    final phone = phoneController.text.trim();
-                    final city = cityController.text.trim();
 
-                    if ([name, details, phone, city].any((e) => e.isEmpty)) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("❌ Please fill all fields")),
-                      );
-                      return;
-                    }
-
-                    // ✅ Add address via BLoC or repository
-                    context.read<ProfileBloc>().add(AddAddress(name, details, phone, city));
-
-                    Navigator.pop(sheetContext);
-                  },
-                  child: const Text("Save"),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      );
-    },
-  );
-}

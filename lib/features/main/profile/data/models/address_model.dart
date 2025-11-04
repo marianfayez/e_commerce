@@ -1,27 +1,33 @@
 class AddressModel {
   AddressModel({
       this.status, 
-      this.message, 
-      this.data,});
+      this.message,
+    this.results,
+
+    this.data,});
 
   AddressModel.fromJson(dynamic json) {
     status = json['status'];
     message = json['message'];
+    results = json['results'];
     if (json['data'] != null) {
       data = [];
       json['data'].forEach((v) {
-        data?.add(Data.fromJson(v));
+        data?.add(AddressData.fromJson(v));
       });
     }
   }
   String? status;
   String? message;
-  List<Data>? data;
+  List<AddressData>? data;
+  int? results;
+
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     map['status'] = status;
     map['message'] = message;
+    map['results'] = results;
     if (data != null) {
       map['data'] = data?.map((v) => v.toJson()).toList();
     }
@@ -30,15 +36,15 @@ class AddressModel {
 
 }
 
-class Data {
-  Data({
+class AddressData {
+  AddressData({
       this.id, 
       this.name, 
       this.details, 
       this.phone, 
       this.city,});
 
-  Data.fromJson(dynamic json) {
+  AddressData.fromJson(dynamic json) {
     id = json['_id'];
     name = json['name'];
     details = json['details'];
