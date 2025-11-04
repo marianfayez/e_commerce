@@ -1,8 +1,14 @@
+import 'package:e_commerce_app/features/main/profile/presentation/Bloc/profile_bloc.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/widgets/showAddAddressSheet.dart';
 import 'package:flutter/material.dart';
 import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-void showAddressesDialog(BuildContext context, List<AddressData> addresses) {
+void showAddressesDialog(
+  BuildContext context,
+  List<AddressData> addresses, {
+  required ProfileBloc profileBloc,
+}) {
   showDialog(
     context: context,
     builder: (ctx) {
@@ -23,10 +29,37 @@ void showAddressesDialog(BuildContext context, List<AddressData> addresses) {
             itemBuilder: (context, index) {
               final address = addresses[index];
               return ListTile(
-                leading: const Icon(Icons.location_on, color: Colors.blueAccent),
+                leading: InkWell(
+                    onTap: () async {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (confirmCtx) => AlertDialog(
+                          title: const Text("Delete Address"),
+                          content: const Text(
+                              "Are you sure you want to delete this address?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(confirmCtx, false),
+                              child: const Text("Cancel"),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(confirmCtx, true),
+                              child: const Text("Delete"),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirm == true && address.id != null) {
+                        profileBloc
+                            .add(DeleteAddressEvent(id: address.id ?? ""));
+                        Navigator.pop(ctx);
+                      }
+                    },
+                    child: const Icon(Icons.delete, color: Colors.blueAccent)),
                 title: Text(address.name ?? ""),
                 subtitle: Text(
-                  "${address.details ?? ''}\n📞 ${address.phone ?? ''}\n🏙️ ${address.city ?? ''}",
+                  "${address.details ?? ''}\n📞 ${address.city ?? ''}\n🏙️ ${address.phone ?? ''}",
                   style: const TextStyle(height: 1.4),
                 ),
                 isThreeLine: true,

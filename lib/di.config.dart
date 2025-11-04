@@ -74,6 +74,8 @@ import 'features/main/profile/data/repositories/profile_repo_impl.dart'
 import 'features/main/profile/domain/repositories/profile_repo.dart' as _i639;
 import 'features/main/profile/domain/use_cases/add_address_use_case.dart'
     as _i1012;
+import 'features/main/profile/domain/use_cases/delete_address_use_case.dart'
+    as _i858;
 import 'features/main/profile/domain/use_cases/profile_use-case.dart' as _i549;
 import 'features/main/profile/presentation/Bloc/profile_bloc.dart' as _i157;
 import 'features/product_details/data/data_sources/remote/product_details_ds.dart'
@@ -171,6 +173,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i466.ProductDetailsBloc(gh<_i761.ProductDetailsUseCase>()));
     gh.factory<_i1012.AddAddressUseCase>(
         () => _i1012.AddAddressUseCase(gh<_i639.ProfileRepo>()));
+    gh.factory<_i858.DeleteAddressUseCase>(
+        () => _i858.DeleteAddressUseCase(gh<_i639.ProfileRepo>()));
     gh.factory<_i529.AddToCartUseCase>(
         () => _i529.AddToCartUseCase(gh<_i30.ProductRepo>()));
     gh.factory<_i35.GetProductUseCase>(
@@ -201,14 +205,15 @@ extension GetItInjectableX on _i174.GetIt {
         ));
     gh.factory<_i549.ProfileUseCase>(
         () => _i549.ProfileUseCase(gh<_i639.ProfileRepo>()));
+    gh.factory<_i157.ProfileBloc>(() => _i157.ProfileBloc(
+          gh<_i549.ProfileUseCase>(),
+          gh<_i1012.AddAddressUseCase>(),
+          gh<_i858.DeleteAddressUseCase>(),
+        ));
     gh.factory<_i491.AddToFavoriteBloc>(() => _i491.AddToFavoriteBloc(
           gh<_i82.AddToFavoriteUseCase>(),
           gh<_i493.RemoveFromFavorite>(),
           gh<_i442.GetFavoriteProductUseCase>(),
-        ));
-    gh.factory<_i157.ProfileBloc>(() => _i157.ProfileBloc(
-          gh<_i549.ProfileUseCase>(),
-          gh<_i1012.AddAddressUseCase>(),
         ));
     return this;
   }

@@ -11,10 +11,12 @@ class ProfileState {
   RequestState? getDataRequestState;
   RequestState? addAddressRequestState;
   RequestState? getAddressRequestState;
+  RequestState? deleteAddressRequestState;
 
   RouteFailures? routeFailures;
   RouteFailures? addAddressFailures;
   RouteFailures? getAddressFailures;
+  RouteFailures? deleteAddressFailures;
 
   ProfileState(
       {this.routeFailures,
@@ -23,6 +25,7 @@ class ProfileState {
       this.addressModel,
       this.getAddressRequestState,
       this.getAddressFailures,
+        this.deleteAddressRequestState,this.deleteAddressFailures,
       this.addAddressRequestState,
       this.addAddressFailures});
 
@@ -32,12 +35,17 @@ class ProfileState {
     RequestState? getAddressRequestState,
     RouteFailures? getAddressFailures,
     RequestState? addAddressRequestState,
+    RequestState? deleteAddressRequestState,
     RouteFailures? addAddressFailures,
+    RouteFailures? deleteAddressFailures,
     RouteFailures? routeFailures,
     RequestState? getDataRequestState,
   }) {
     return ProfileState(
         getAddressFailures: getAddressFailures ?? this.getAddressFailures,
+        deleteAddressFailures: deleteAddressFailures ?? this.deleteAddressFailures,
+        deleteAddressRequestState: deleteAddressRequestState ?? this.deleteAddressRequestState,
+
         getAddressRequestState:
             getAddressRequestState ?? this.getAddressRequestState,
         addressModel: addressModel ?? this.addressModel,

@@ -10,4 +10,6 @@ abstract class ProfileRepo {
   Future<Either<RouteFailures, AddressModel>> addAddress(
       {required String name, required String details,required String phone,required String city});
   Future<Either<RouteFailures, AddressModel>> getAddresses();
+  Future<Either<RouteFailures, AddressModel>> deleteAddress( String? id);
+
 }

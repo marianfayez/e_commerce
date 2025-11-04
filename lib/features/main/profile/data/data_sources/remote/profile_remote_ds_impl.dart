@@ -87,4 +87,26 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
       throw Exception(e.error?.toString() ?? 'Unknown error occurred');
     }
   }
+
+  @override
+  Future<AddressModel> deleteAddresses(String? id) async{
+    try {
+      final prefs = await SharedPrefsHelper.getInstance();
+      final token = prefs.getValue<String>('token');
+
+      var response = await apiManager.deleteRequest(EndPoints.deleteAddress(id),
+          headers: {
+            "token": token,
+          });
+      if (response.data is Map<String, dynamic>) {
+        return AddressModel.fromJson(response.data); // Parsing JSON response
+      } else {
+        throw Exception('Invalid response format');
+      }
+    } on DioException catch (e) {
+      final errorMessage = e.error?.toString() ?? 'Unknown error occurred';
+      throw Exception(
+          errorMessage); // or rethrow with ServerFailure if using Either
+    }
+  }
 }

@@ -8,5 +8,7 @@ abstract class ProfileRemoteDs{
   Future<AddressModel>addAddress(
       {String? name, String? details, String? phone, String? city});
   Future<AddressModel> getAddresses();
+  Future<AddressModel> deleteAddresses(String? id);
+
 
 }

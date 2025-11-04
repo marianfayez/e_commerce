@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:e_commerce_app/features/main/profile/domain/use_cases/add_address_use_case.dart';
+import 'package:e_commerce_app/features/main/profile/domain/use_cases/delete_address_use_case.dart';
 import 'package:e_commerce_app/features/main/profile/domain/use_cases/profile_use-case.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/Bloc/profile_state.dart';
 import 'package:injectable/injectable.dart';
@@ -10,8 +11,9 @@ part 'profile_event.dart';
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ProfileUseCase profileUseCase;
   AddAddressUseCase addAddressUseCase;
+  DeleteAddressUseCase deleteAddressUseCase;
 
-  ProfileBloc(this.profileUseCase,this.addAddressUseCase) : super(ProfileInitial()) {
+  ProfileBloc(this.profileUseCase,this.addAddressUseCase,this.deleteAddressUseCase) : super(ProfileInitial()) {
     on<ProfileEvent>((event, emit) {
       // TODO: implement event handler
     });
@@ -69,6 +71,38 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             getAddressRequestState: RequestState.success,
             addressModel: result
         ));
+      });
+    });
+
+    on<DeleteAddressEvent>((event, emit) async {
+      emit(state.copyWith(
+          deleteAddressRequestState: RequestState.loading));
+      var result = await deleteAddressUseCase.deleteAddress(event.id);
+      return result.fold((error) {
+        print("error response");
+        print("❌ Error: $error");
+
+        emit(state.copyWith(
+           deleteAddressRequestState: RequestState.error,
+            deleteAddressFailures: error));
+      }, (success) async {
+        print("✅ Address removed, now refreshing...");
+
+        // بعد نجاح الحذف، نعيد تحميل السلة مباشرة
+        final refreshedAddress = await addAddressUseCase.getAddress();
+        refreshedAddress.fold((err) {
+          emit(state.copyWith(
+            deleteAddressRequestState: RequestState.error,
+            deleteAddressFailures: err,
+          ));
+        }, (updatedAddress) async {
+          print("✅ Item removed successfully");
+          emit(state.copyWith(
+           deleteAddressRequestState: RequestState.success,
+            getAddressRequestState: RequestState.success,
+            addressModel: updatedAddress,
+          ));
+        });
       });
     });
 

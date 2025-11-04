@@ -226,7 +226,7 @@ class ProfileTabState extends State<ProfileTab> {
                           : 'Add Shipping Address',
                       onTap: () {
                         if (state.addressModel?.data != null && state.addressModel!.data!.isNotEmpty) {
-                          showAddressesDialog(context,state.addressModel!.data! );
+                          showAddressesDialog(context,state.addressModel!.data!, profileBloc: context.read<ProfileBloc>(), );
                         } else {
                           showAddAddressSheet(context);
                         }

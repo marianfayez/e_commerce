@@ -5,16 +5,13 @@ import 'package:e_commerce_app/features/main/profile/domain/repositories/profile
 import 'package:injectable/injectable.dart';
 
 @injectable
-class AddAddressUseCase {
+class DeleteAddressUseCase {
   ProfileRepo addressRepo;
 
-  AddAddressUseCase(this.addressRepo);
+  DeleteAddressUseCase(this.addressRepo);
 
-  Future<Either<RouteFailures, AddressModel>> call(
-          String name, String details, String phone, String city) =>
-      addressRepo.addAddress(name: name,details: details,phone: phone,city: city);
-  Future<Either<RouteFailures, AddressModel>> getAddress() =>
-      addressRepo.getAddresses();
 
+  Future<Either<RouteFailures, AddressModel>> deleteAddress(String id) =>
+      addressRepo.deleteAddress( id);
 
 }

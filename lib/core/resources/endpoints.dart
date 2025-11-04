@@ -10,6 +10,8 @@ class EndPoints {
   static String subCategories(String id) =>
       "/api/v1/categories/$id/subcategories";
 
+  static String deleteAddress(String? id) =>
+      "/api/v1/addresses/$id";
   static String deleteCartItem(String? id) =>
       "/api/v1/cart/$id";
   static String updateCartItem(String? id) =>

@@ -55,4 +55,15 @@ class ProfileRepoImpl implements ProfileRepo {
       return Left(RemoteFailures(e.toString()));
     }
   }
+
+  @override
+  Future<Either<RouteFailures, AddressModel>> deleteAddress(String? id) async{
+    try {
+      var result = await profileRemoteDs.deleteAddresses(id);
+      return Right(result);
+    } catch (e) {
+      print("Parsing error: $e");
+      return Left(RemoteFailures(e.toString()));
+    }
+  }
 }

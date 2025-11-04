@@ -14,6 +14,11 @@ class AddAddress extends ProfileEvent{
   AddAddress(this.name,this.details,this.phone,this.city);
 }
 
+class DeleteAddressEvent extends ProfileEvent {
+  final String id;
+
+  DeleteAddressEvent({required this.id});
+}
 class GetAddresses  extends ProfileEvent{
 
 }

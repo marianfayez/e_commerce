@@ -32,11 +32,11 @@ void showAddAddressSheet(BuildContext context) {
             const SizedBox(height: 16),
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(labelText: "Name"),
+              decoration: const InputDecoration(labelText: "Home/Work/.."),
             ),
             TextField(
               controller: detailsController,
-              decoration: const InputDecoration(labelText: "Details"),
+              decoration: const InputDecoration(labelText: "Street Name"),
             ),
             TextField(
               controller: phoneController,
