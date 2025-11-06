@@ -11,8 +11,8 @@ import 'package:e_commerce_app/di.dart';
 import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/Bloc/profile_bloc.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/Bloc/profile_state.dart';
-import 'package:e_commerce_app/features/main/profile/presentation/widgets/showAddAddressSheet.dart';
-import 'package:e_commerce_app/features/main/profile/presentation/widgets/showAddressesDialog.dart';
+import 'package:e_commerce_app/features/main/profile/presentation/widgets/AddAddressSheet.dart';
+import 'package:e_commerce_app/features/main/profile/presentation/widgets/AddressDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -31,11 +31,7 @@ class ProfileTabState extends State<ProfileTab> {
   bool isPasswordReadOnly = true;
   bool isMobileNumberReadOnly = true;
   bool isAddressReadOnly = true;
-  final TextEditingController addressNameController = TextEditingController();
-  final TextEditingController addressDetailsController =
-      TextEditingController();
-  final TextEditingController addressPhoneController = TextEditingController();
-  final TextEditingController addressCityController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -225,10 +221,44 @@ class ProfileTabState extends State<ProfileTab> {
                           ? 'Show All Shipping Addresses'
                           : 'Add Shipping Address',
                       onTap: () {
-                        if (state.addressModel?.data != null && state.addressModel!.data!.isNotEmpty) {
-                          showAddressesDialog(context,state.addressModel!.data!, profileBloc: context.read<ProfileBloc>(), );
+                        final blocContext = context; // ← هذا الـ context من داخل BlocConsumer
+
+                        if (state.addressModel?.data != null &&
+                            state.addressModel!.data!.isNotEmpty) {
+                          showDialog(
+                            context: blocContext,
+                            builder: (_) => AddressDialog(
+                              context: blocContext,
+                              profileBloc: blocContext.read<ProfileBloc>(),
+                              addresses: state.addressModel!.data!, // ✅ بدون أقواس مربعة إضافية
+                            ),
+                          );
                         } else {
-                          showAddAddressSheet(context);
+                          showModalBottomSheet(
+                            context: blocContext,
+                            isScrollControlled: true,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(20)),
+                            ),
+                            builder: (context) {
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                                ),
+                                child: SingleChildScrollView(
+                                  child: AddAddressSheet(
+                                    onSave: (name, details, phone, city) {
+                                      blocContext
+                                          .read<ProfileBloc>()
+                                          .add(AddAddress(name, details, phone, city));
+                                    },
+                                  ),
+
+                                ),
+                              );
+                            },
+                          );
                         }
                       },
                     ),
@@ -256,5 +286,3 @@ class ProfileTabState extends State<ProfileTab> {
     );
   }
 }
-
-

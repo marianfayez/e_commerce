@@ -61,11 +61,7 @@ class SignUpScreen extends StatelessWidget {
                       ],
                     ));
           } else if (state.requestState == RequestState.success) {
-
-
-              context.router.replaceAll([const MainRoute()]);
-
-
+            context.router.replaceAll([const MainRoute()]);
           }
         },
         builder: (context, state) {
@@ -140,9 +136,10 @@ class SignUpScreen extends StatelessWidget {
                         controller: mobileController,
                         validation: AppValidators.validatePhoneNumber,
                         textInputType: TextInputType.phone,
-                        onTap: ()async{
+                        onTap: () async {
                           final prefs = await SharedPrefsHelper.getInstance();
-                          await prefs.setValue<String>('phone', mobileController.text);
+                          await prefs.setValue<String>(
+                              'phone', mobileController.text);
                         },
                       ),
                       SizedBox(
