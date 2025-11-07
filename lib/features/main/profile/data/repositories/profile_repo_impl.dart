@@ -15,6 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 @Injectable(as: ProfileRepo)
 class ProfileRepoImpl implements ProfileRepo {
   ProfileRemoteDs profileRemoteDs;
+
   ProfileRepoImpl(this.profileRemoteDs);
 
   @override
@@ -29,17 +30,9 @@ class ProfileRepoImpl implements ProfileRepo {
 
   @override
   Future<Either<RouteFailures, AddressModel>> addAddress(
-      {required String name,
-      required String details,
-      required String phone,
-      required String city}) async {
+      {required AddressData model}) async {
     try {
-      var result = await profileRemoteDs.addAddress(
-        name: name,
-        details: details,
-        phone: phone,
-        city: city,
-      );
+      var result = await profileRemoteDs.addAddress(model: model);
       return Right(result);
     } catch (e) {
       return Left(RemoteFailures(e.toString()));
@@ -57,7 +50,7 @@ class ProfileRepoImpl implements ProfileRepo {
   }
 
   @override
-  Future<Either<RouteFailures, AddressModel>> deleteAddress(String? id) async{
+  Future<Either<RouteFailures, AddressModel>> deleteAddress(String? id) async {
     try {
       var result = await profileRemoteDs.deleteAddresses(id);
       return Right(result);

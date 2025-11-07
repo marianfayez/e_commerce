@@ -7,9 +7,7 @@ import 'package:injectable/injectable.dart';
 
 abstract class ProfileRepo {
   Future<Either<RouteFailures, AuthModel>> profile();
-  Future<Either<RouteFailures, AddressModel>> addAddress(
-      {required String name, required String details,required String phone,required String city});
+  Future<Either<RouteFailures, AddressModel>> addAddress({required AddressData model});
   Future<Either<RouteFailures, AddressModel>> getAddresses();
-  Future<Either<RouteFailures, AddressModel>> deleteAddress( String? id);
-
+  Future<Either<RouteFailures, AddressModel>> deleteAddress(String? id);
 }

@@ -2,16 +2,12 @@ part of 'profile_bloc.dart';
 
 abstract class ProfileEvent {}
 
-class GetData extends ProfileEvent{
+class GetData extends ProfileEvent {}
 
-}
+class AddAddress extends ProfileEvent {
+  AddressData model;
 
-class AddAddress extends ProfileEvent{
-  String name;
-  String details;
-  String phone;
-  String city;
-  AddAddress(this.name,this.details,this.phone,this.city);
+  AddAddress(this.model);
 }
 
 class DeleteAddressEvent extends ProfileEvent {
@@ -19,6 +15,5 @@ class DeleteAddressEvent extends ProfileEvent {
 
   DeleteAddressEvent({required this.id});
 }
-class GetAddresses  extends ProfileEvent{
 
-}
+class GetAddresses extends ProfileEvent {}

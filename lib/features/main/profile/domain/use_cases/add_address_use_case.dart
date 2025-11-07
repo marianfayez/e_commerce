@@ -11,10 +11,8 @@ class AddAddressUseCase {
   AddAddressUseCase(this.addressRepo);
 
   Future<Either<RouteFailures, AddressModel>> call(
-          String name, String details, String phone, String city) =>
-      addressRepo.addAddress(name: name,details: details,phone: phone,city: city);
+          {required AddressData model}) =>
+      addressRepo.addAddress(model: model);
   Future<Either<RouteFailures, AddressModel>> getAddress() =>
       addressRepo.getAddresses();
-
-
 }

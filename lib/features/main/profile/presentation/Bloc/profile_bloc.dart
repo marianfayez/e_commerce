@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
 import 'package:e_commerce_app/features/main/profile/domain/use_cases/add_address_use_case.dart';
 import 'package:e_commerce_app/features/main/profile/domain/use_cases/delete_address_use_case.dart';
 import 'package:e_commerce_app/features/main/profile/domain/use_cases/profile_use-case.dart';
@@ -39,8 +40,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     on<AddAddress>((event, emit) async {
       emit(state.copyWith(addAddressRequestState: RequestState.loading));
-      var result = await addAddressUseCase.call( event.name,event.city, event.details,event.phone);
-      print("📬 Adding address: ${event.name}, ${event.details}, ${event.phone}, ${event.city}");
+      var result = await addAddressUseCase.call( model: event.model);
 
       return result.fold((error) {
         print("error response");
@@ -48,11 +48,24 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
         emit(state.copyWith(
             addAddressRequestState: RequestState.error, addAddressFailures: error));
-      }, (result) {
-        emit(state.copyWith(
+      }, (result) async {
+        result.data?.removeWhere((address) => address.id == null);
+
+        print("✅ Address added, now refreshing...");
+        final refreshedAddress = await addAddressUseCase.getAddress();
+        refreshedAddress.fold((err) {
+          emit(state.copyWith(
+            getAddressRequestState: RequestState.error,
+            getAddressFailures: err,
+          ));
+        }, (updatedAddress) async {
+          print("✅ Item updated successfully");
+          emit(state.copyWith(
             addAddressRequestState: RequestState.success,
-            addressModel: result
-        ));
+            getAddressRequestState: RequestState.success,
+            addressModel: updatedAddress,
+          ));
+        });
       });
     });
     on<GetAddresses>((event, emit) async {

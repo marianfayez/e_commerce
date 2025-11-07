@@ -31,6 +31,14 @@ class ProfileTabState extends State<ProfileTab> {
   bool isPasswordReadOnly = true;
   bool isMobileNumberReadOnly = true;
   bool isAddressReadOnly = true;
+  String selectedAddressText = "";
+  final TextEditingController addressController = TextEditingController();
+
+  @override
+  void dispose() {
+    addressController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +63,12 @@ class ProfileTabState extends State<ProfileTab> {
               context, state.getDataRequestState == RequestState.loading);
         },
         builder: (context, state) {
+          if (state.addressModel?.data != null &&
+              state.addressModel!.data!.isNotEmpty) {
+            addressController.text = selectedAddressText.isNotEmpty
+                ? selectedAddressText
+                : state.addressModel!.data!.first.details ?? '';
+          }
           return Padding(
             padding: const EdgeInsets.all(20),
             child: SafeArea(
@@ -189,9 +203,7 @@ class ProfileTabState extends State<ProfileTab> {
                     if (state.addressModel?.data != null &&
                         state.addressModel!.data!.isNotEmpty)
                       BuildTextField(
-                        controller: TextEditingController(
-                            text:
-                                state.addressModel!.data!.first.details ?? ''),
+                        controller: addressController,
                         borderBackgroundColor:
                             ColorManager.primary.withOpacity(.5),
                         readOnly: isAddressReadOnly,
@@ -221,16 +233,32 @@ class ProfileTabState extends State<ProfileTab> {
                           ? 'Show All Shipping Addresses'
                           : 'Add Shipping Address',
                       onTap: () {
-                        final blocContext = context; // ← هذا الـ context من داخل BlocConsumer
-
-                        if (state.addressModel?.data != null &&
-                            state.addressModel!.data!.isNotEmpty) {
+                        final validAddresses = state.addressModel?.data
+                            ?.where((address) => address.id != null)
+                            .toList() ?? [];
+                        final blocContext = context;
+                        if (validAddresses.isNotEmpty) {
                           showDialog(
                             context: blocContext,
                             builder: (_) => AddressDialog(
-                              context: blocContext,
+                              onSelectAddress: (selectedAddress) {
+                                setState(() {
+                                  selectedAddressText =
+                                      selectedAddress.details ?? "";
+                                  addressController.text = selectedAddressText;
+                                });
+                              },
                               profileBloc: blocContext.read<ProfileBloc>(),
-                              addresses: state.addressModel!.data!, // ✅ بدون أقواس مربعة إضافية
+                              addresses: validAddresses,
+                              onSave: (String name, String details,
+                                  String phone, String city) {
+                                blocContext.read<ProfileBloc>().add(AddAddress(
+                                    AddressData(
+                                        name: name,
+                                        details: details,
+                                        phone: phone,
+                                        city: city)));
+                              },
                             ),
                           );
                         } else {
@@ -244,17 +272,20 @@ class ProfileTabState extends State<ProfileTab> {
                             builder: (context) {
                               return Padding(
                                 padding: EdgeInsets.only(
-                                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                                  bottom:
+                                      MediaQuery.of(context).viewInsets.bottom,
                                 ),
                                 child: SingleChildScrollView(
                                   child: AddAddressSheet(
                                     onSave: (name, details, phone, city) {
-                                      blocContext
-                                          .read<ProfileBloc>()
-                                          .add(AddAddress(name, details, phone, city));
+                                      blocContext.read<ProfileBloc>().add(
+                                          AddAddress(AddressData(
+                                              name: name,
+                                              details: details,
+                                              phone: phone,
+                                              city: city)));
                                     },
                                   ),
-
                                 ),
                               );
                             },

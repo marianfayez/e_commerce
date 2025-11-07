@@ -45,7 +45,7 @@ class AddressData {
       this.city,});
 
   AddressData.fromJson(dynamic json) {
-    id = json['_id'];
+    id = json['_id']?? json['id'];
     name = json['name'];
     details = json['details'];
     phone = json['phone'];
@@ -59,7 +59,7 @@ class AddressData {
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
-    map['_id'] = id;
+    if (id != null) map['_id'] = id;
     map['name'] = name;
     map['details'] = details;
     map['phone'] = phone;

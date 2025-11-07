@@ -12,6 +12,7 @@ import 'package:injectable/injectable.dart';
 @Injectable(as: ProfileRemoteDs)
 class ProfileRemoteDsImpl implements ProfileRemoteDs {
   ApiManager apiManager;
+
   ProfileRemoteDsImpl(this.apiManager);
 
   @override
@@ -41,25 +42,17 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
   }
 
   @override
-  Future<AddressModel> addAddress(
-      {String? name, String? details, String? phone, String? city}) async {
+  Future<AddressModel> addAddress({required AddressData model}) async {
     try {
-      print("📦 SENDING DATA TO API: name=$name, details=$details, phone=$phone, city=$city");
-
+      //  print("📦 SENDING DATA TO API: name=$name, details=$details, phone=$phone, city=$city");
       final prefs = await SharedPrefsHelper.getInstance();
       final token = prefs.getValue<String>('token');
 
-      var response = await apiManager.postData(EndPoints.addAddress, data: {
-        "name": name,
-        "details": details,
-        "phone": phone,
-        "city": city
-      }, headers: {
+      var response = await apiManager
+          .postData(EndPoints.addAddress, data: model.toJson(), headers: {
         "token": token,
       });
-
       final addressModel = AddressModel.fromJson(response.data);
-      print("✅ RESPONSE PARSED: ${addressModel.data?.first??""}"); // هتطلعلك اسم أول عنوان
       return addressModel;
     } on DioException catch (e) {
       final errorMessage = e.error?.toString() ?? 'Unknown error occurred';
@@ -69,12 +62,13 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
   }
 
   @override
-  Future<AddressModel> getAddresses() async{
+  Future<AddressModel> getAddresses() async {
     try {
       final prefs = await SharedPrefsHelper.getInstance();
       final token = prefs.getValue<String>('token');
 
-      var response = await apiManager.getData(endPoint: EndPoints.addAddress, headers: {
+      var response =
+          await apiManager.getData(endPoint: EndPoints.addAddress, headers: {
         "token": token,
       });
 
@@ -89,15 +83,15 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
   }
 
   @override
-  Future<AddressModel> deleteAddresses(String? id) async{
+  Future<AddressModel> deleteAddresses(String? id) async {
     try {
       final prefs = await SharedPrefsHelper.getInstance();
       final token = prefs.getValue<String>('token');
 
-      var response = await apiManager.deleteRequest(EndPoints.deleteAddress(id),
-          headers: {
-            "token": token,
-          });
+      var response =
+          await apiManager.deleteRequest(EndPoints.deleteAddress(id), headers: {
+        "token": token,
+      });
       if (response.data is Map<String, dynamic>) {
         return AddressModel.fromJson(response.data); // Parsing JSON response
       } else {
