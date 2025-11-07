@@ -103,4 +103,31 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
           errorMessage); // or rethrow with ServerFailure if using Either
     }
   }
+
+  @override
+  Future<AuthModel> updatePhoneNumber({required String phone}) async{
+    try {
+      final prefs = await SharedPrefsHelper.getInstance();
+
+      final token = prefs.getValue<String>('token');
+      final name = prefs.getValue<String>('name');
+      final email = prefs.getValue<String>('email');
+      if (name == null || email == null || token == null) {
+        throw Exception('User data not found in local storage');
+      }
+      await prefs.setValue<String>('phone', phone);
+
+      final user = User(name: name, email: email, phone: phone);
+      final authModel = AuthModel(
+        message: 'Profile loaded successfully (local)',
+        user: user,
+        token: token,
+      );
+      return authModel;
+
+
+    } on DioException catch (e) {
+      throw Exception(e.error?.toString() ?? 'Unknown error occurred');
+    }
+  }
 }

@@ -5,6 +5,8 @@ import 'package:e_commerce_app/features/main/profile/data/models/address_model.d
 abstract class ProfileRemoteDs {
   Future<AuthModel> profile();
 
+  Future<AuthModel> updatePhoneNumber({required String phone});
+
   Future<AddressModel> addAddress({required AddressData model});
 
   Future<AddressModel> getAddresses();

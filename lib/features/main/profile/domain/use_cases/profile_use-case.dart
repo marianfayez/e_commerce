@@ -12,4 +12,6 @@ class ProfileUseCase {
   ProfileUseCase(this.profileRepo);
 
   Future<Either<RouteFailures,AuthModel>>call()=>profileRepo.profile();
+  Future<Either<RouteFailures,AuthModel>>updatePhoneNumber({required String phone})=>profileRepo.updatePhoneNumber(phone: phone);
+
 }

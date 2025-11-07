@@ -119,5 +119,22 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       });
     });
 
+    on<UpdatePhoneNumberEvent>((event, emit) async {
+      emit(state.copyWith(getDataRequestState: RequestState.loading));
+      final result = await profileUseCase.updatePhoneNumber(phone:event.phone);
+      return result.fold((error) {
+        print("error response");
+        print("❌ Error: $error");
+        emit(state.copyWith(
+            getDataRequestState: RequestState.error, routeFailures: error));
+      }, (result) {
+        print("✅ success response with user data: ${result.user?.phone}");
+        emit(state.copyWith(
+            getDataRequestState: RequestState.success,
+            authModel: result
+        ));
+      });
+
+    });
   }
 }

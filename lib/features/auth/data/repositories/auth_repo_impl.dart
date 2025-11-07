@@ -24,7 +24,6 @@ class AuthRepoImpl implements AuthRepo{
       await prefs.setValue<String>("token", result.token ?? "");
       await prefs.setValue<String>("name", result.user?.name ?? "");
       await prefs.setValue<String>("email", result.user?.email ?? "");
-      await prefs.setValue<String>("phone", request.phone ?? "");
 
       return Right(result);
     }catch(e){

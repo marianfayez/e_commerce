@@ -33,6 +33,14 @@ class ProfileTabState extends State<ProfileTab> {
   bool isAddressReadOnly = true;
   String selectedAddressText = "";
   final TextEditingController addressController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+
+  @override
+  void dispose() {
+    phoneController.dispose();
+    addressController.dispose();
+    super.dispose();
+  }
 
   // @override
   // void dispose() {
@@ -63,11 +71,12 @@ class ProfileTabState extends State<ProfileTab> {
               context, state.getDataRequestState == RequestState.loading);
         },
         builder: (context, state) {
+          phoneController.text = state.authModel?.user?.phone ?? "";
           if (state.addressModel?.data != null &&
               state.addressModel!.data!.isNotEmpty &&
               state.addressModel!.data!.any((address) => address.id != null)) {
-            final validAddress = state.addressModel!.data!
-                .firstWhere((address) => address.id != null,
+            final validAddress = state.addressModel!.data!.firstWhere(
+                (address) => address.id != null,
                 orElse: () => state.addressModel!.data!.first);
 
             addressController.text = selectedAddressText.isNotEmpty
@@ -153,35 +162,34 @@ class ProfileTabState extends State<ProfileTab> {
                           getRegularStyle(color: ColorManager.primary)
                               .copyWith(fontSize: 18.sp),
                     ),
+                    // SizedBox(height: 18.h),
+                    // BuildTextField(
+                    //   onTap: () {
+                    //     setState(() {
+                    //       isPasswordReadOnly = false;
+                    //     });
+                    //   },
+                    //   controller:
+                    //       TextEditingController(text: '123456789123456'),
+                    //   borderBackgroundColor:
+                    //       ColorManager.primary.withOpacity(.5),
+                    //   readOnly: isPasswordReadOnly,
+                    //   backgroundColor: ColorManager.white,
+                    //   hint: 'Enter your password',
+                    //   label: 'Password',
+                    //   isObscured: true,
+                    //   labelTextStyle: getMediumStyle(
+                    //       color: ColorManager.primary, fontSize: FontSize.s18),
+                    //   // suffixIcon: SvgPicture.asset(SvgAssets.edit),
+                    //   textInputType: TextInputType.text,
+                    //   validation: AppValidators.validatePassword,
+                    //   hintTextStyle:
+                    //       getRegularStyle(color: ColorManager.primary)
+                    //           .copyWith(fontSize: 18.sp),
+                    // ),
                     SizedBox(height: 18.h),
                     BuildTextField(
-                      onTap: () {
-                        setState(() {
-                          isPasswordReadOnly = false;
-                        });
-                      },
-                      controller:
-                          TextEditingController(text: '123456789123456'),
-                      borderBackgroundColor:
-                          ColorManager.primary.withOpacity(.5),
-                      readOnly: isPasswordReadOnly,
-                      backgroundColor: ColorManager.white,
-                      hint: 'Enter your password',
-                      label: 'Password',
-                      isObscured: true,
-                      labelTextStyle: getMediumStyle(
-                          color: ColorManager.primary, fontSize: FontSize.s18),
-                      // suffixIcon: SvgPicture.asset(SvgAssets.edit),
-                      textInputType: TextInputType.text,
-                      validation: AppValidators.validatePassword,
-                      hintTextStyle:
-                          getRegularStyle(color: ColorManager.primary)
-                              .copyWith(fontSize: 18.sp),
-                    ),
-                    SizedBox(height: 18.h),
-                    BuildTextField(
-                      controller: TextEditingController(
-                          text: state.authModel?.user?.phone ?? ""),
+                      controller: phoneController,
                       borderBackgroundColor:
                           ColorManager.primary.withOpacity(.5),
                       readOnly: isMobileNumberReadOnly,
@@ -190,14 +198,14 @@ class ProfileTabState extends State<ProfileTab> {
                       label: 'Your mobile number',
                       labelTextStyle: getMediumStyle(
                           color: ColorManager.primary, fontSize: FontSize.s18),
-                      // suffixIcon: IconButton(
-                      //   icon: SvgPicture.asset(SvgAssets.edit),
-                      //   onPressed: () {
-                      //     setState(() {
-                      //       isMobileNumberReadOnly = false;
-                      //     });
-                      //   },
-                      // ),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          setState(() {
+                            isMobileNumberReadOnly = false;
+                          });
+                        },
+                      ),
                       textInputType: TextInputType.phone,
                       validation: AppValidators.validatePhoneNumber,
                       hintTextStyle:
@@ -309,6 +317,19 @@ class ProfileTabState extends State<ProfileTab> {
                       onTap: () async {},
                     ),
                     SizedBox(height: 25.h),
+                    CustomElevatedButton(
+                      label: 'Save Updates',
+                      onTap: () async {
+                        context
+                            .read<ProfileBloc>()
+                            .add(UpdatePhoneNumberEvent(phoneController.text));
+                        setState(() {
+                          isMobileNumberReadOnly = true;
+                        });
+                      },
+                    ),
+                    SizedBox(height: 25.h),
+
                     CustomElevatedButton(
                       label: 'Log Out',
                       onTap: () async {
