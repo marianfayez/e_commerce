@@ -34,11 +34,11 @@ class ProfileTabState extends State<ProfileTab> {
   String selectedAddressText = "";
   final TextEditingController addressController = TextEditingController();
 
-  @override
-  void dispose() {
-    addressController.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   addressController.dispose();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -64,10 +64,15 @@ class ProfileTabState extends State<ProfileTab> {
         },
         builder: (context, state) {
           if (state.addressModel?.data != null &&
-              state.addressModel!.data!.isNotEmpty) {
+              state.addressModel!.data!.isNotEmpty &&
+              state.addressModel!.data!.any((address) => address.id != null)) {
+            final validAddress = state.addressModel!.data!
+                .firstWhere((address) => address.id != null,
+                orElse: () => state.addressModel!.data!.first);
+
             addressController.text = selectedAddressText.isNotEmpty
                 ? selectedAddressText
-                : state.addressModel!.data!.first.details ?? '';
+                : validAddress.details ?? '';
           }
           return Padding(
             padding: const EdgeInsets.all(20),
@@ -201,7 +206,9 @@ class ProfileTabState extends State<ProfileTab> {
                     ),
                     SizedBox(height: 18.h),
                     if (state.addressModel?.data != null &&
-                        state.addressModel!.data!.isNotEmpty)
+                        state.addressModel!.data!.isNotEmpty &&
+                        state.addressModel!.data!
+                            .any((address) => address.id != null))
                       BuildTextField(
                         controller: addressController,
                         borderBackgroundColor:
@@ -229,13 +236,16 @@ class ProfileTabState extends State<ProfileTab> {
                     SizedBox(height: 50.h),
                     CustomElevatedButton(
                       label: (state.addressModel?.data != null &&
-                              state.addressModel!.data!.isNotEmpty)
+                              state.addressModel!.data!.isNotEmpty &&
+                              state.addressModel!.data!
+                                  .any((address) => address.id != null))
                           ? 'Show All Shipping Addresses'
                           : 'Add Shipping Address',
                       onTap: () {
                         final validAddresses = state.addressModel?.data
-                            ?.where((address) => address.id != null)
-                            .toList() ?? [];
+                                ?.where((address) => address.id != null)
+                                .toList() ??
+                            [];
                         final blocContext = context;
                         if (validAddresses.isNotEmpty) {
                           showDialog(
