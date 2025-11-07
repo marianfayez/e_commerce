@@ -105,29 +105,32 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
   }
 
   @override
-  Future<AuthModel> updatePhoneNumber({required String phone}) async{
+  Future<AuthModel> updateUserProfile({required User user}) async {
     try {
       final prefs = await SharedPrefsHelper.getInstance();
-
       final token = prefs.getValue<String>('token');
-      final name = prefs.getValue<String>('name');
-      final email = prefs.getValue<String>('email');
-      if (name == null || email == null || token == null) {
-        throw Exception('User data not found in local storage');
-      }
-      await prefs.setValue<String>('phone', phone);
 
-      final user = User(name: name, email: email, phone: phone);
-      final authModel = AuthModel(
-        message: 'Profile loaded successfully (local)',
-        user: user,
-        token: token,
-      );
+      var response = await apiManager
+          .putData(EndPoints.updateProfile, body: user.toJson(), headers: {
+        "token": token,
+      });
+      final authModel = AuthModel.fromJson(response.data);
       return authModel;
-
-
     } on DioException catch (e) {
-      throw Exception(e.error?.toString() ?? 'Unknown error occurred');
+      String message = "Something went wrong";
+
+      if (e.response?.data != null) {
+        final data = e.response!.data;
+        if (data is Map && data.containsKey("errors")) {
+          // ✅ السيرفر بيرجع errors في شكل {"errors": {"msg": "..."}}
+          message = data["errors"]["msg"] ?? data["message"] ?? message;
+        } else if (data is Map && data.containsKey("message")) {
+          message = data["message"];
+        }
+      }
+      throw Exception(message);
+    } catch (e) {
+      throw Exception(e.toString());
     }
   }
 }

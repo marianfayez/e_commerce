@@ -136,11 +136,6 @@ class SignUpScreen extends StatelessWidget {
                         controller: mobileController,
                         validation: AppValidators.validatePhoneNumber,
                         textInputType: TextInputType.phone,
-                        onTap: () async {
-                          final prefs = await SharedPrefsHelper.getInstance();
-                          await prefs.setValue<String>(
-                              'phone', mobileController.text);
-                        },
                       ),
                       SizedBox(
                         height: 50.h,

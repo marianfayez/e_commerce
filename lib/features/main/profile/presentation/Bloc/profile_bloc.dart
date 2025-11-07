@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:e_commerce_app/features/auth/data/models/auth_model.dart';
 import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
 import 'package:e_commerce_app/features/main/profile/domain/use_cases/add_address_use_case.dart';
 import 'package:e_commerce_app/features/main/profile/domain/use_cases/delete_address_use_case.dart';
@@ -119,9 +120,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       });
     });
 
-    on<UpdatePhoneNumberEvent>((event, emit) async {
+    on<UpdateUserProfileEvent>((event, emit) async {
       emit(state.copyWith(getDataRequestState: RequestState.loading));
-      final result = await profileUseCase.updatePhoneNumber(phone:event.phone);
+      final result = await profileUseCase.updateUserProfile(user:event.user);
       return result.fold((error) {
         print("error response");
         print("❌ Error: $error");

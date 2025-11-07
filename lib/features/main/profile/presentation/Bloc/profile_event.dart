@@ -15,8 +15,8 @@ class DeleteAddressEvent extends ProfileEvent {
 
   DeleteAddressEvent({required this.id});
 }
-class UpdatePhoneNumberEvent extends ProfileEvent {
-  final String phone;
-  UpdatePhoneNumberEvent(this.phone);
+class UpdateUserProfileEvent extends ProfileEvent {
+  final User user;
+  UpdateUserProfileEvent(this.user);
 }
 class GetAddresses extends ProfileEvent {}

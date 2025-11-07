@@ -8,6 +8,7 @@ import 'package:e_commerce_app/core/widgets/custom_elevated_button.dart';
 import 'package:e_commerce_app/core/widgets/main_text_field.dart';
 import 'package:e_commerce_app/core/widgets/validators.dart';
 import 'package:e_commerce_app/di.dart';
+import 'package:e_commerce_app/features/auth/data/models/auth_model.dart';
 import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/Bloc/profile_bloc.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/Bloc/profile_state.dart';
@@ -34,6 +35,8 @@ class ProfileTabState extends State<ProfileTab> {
   String selectedAddressText = "";
   final TextEditingController addressController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
 
   @override
   void dispose() {
@@ -72,6 +75,8 @@ class ProfileTabState extends State<ProfileTab> {
         },
         builder: (context, state) {
           phoneController.text = state.authModel?.user?.phone ?? "";
+          nameController.text = state.authModel?.user?.name ?? "";
+          emailController.text = state.authModel?.user?.email ?? "";
           if (state.addressModel?.data != null &&
               state.addressModel!.data!.isNotEmpty &&
               state.addressModel!.data!.any((address) => address.id != null)) {
@@ -118,18 +123,9 @@ class ProfileTabState extends State<ProfileTab> {
                       backgroundColor: ColorManager.white,
                       hint: 'Enter your full name',
                       label: 'Full Name',
-                      controller: TextEditingController(
-                          text: state.authModel?.user?.name ?? ""),
+                      controller: nameController,
                       labelTextStyle: getMediumStyle(
                           color: ColorManager.primary, fontSize: FontSize.s18),
-                      // suffixIcon: IconButton(
-                      //   icon: SvgPicture.asset(SvgAssets.edit),
-                      //   onPressed: () {
-                      //     setState(() {
-                      //       isFullNameReadOnly = false;
-                      //     });
-                      //   },
-                      // ),
                       textInputType: TextInputType.text,
                       validation: AppValidators.validateFullName,
                       hintTextStyle:
@@ -144,18 +140,9 @@ class ProfileTabState extends State<ProfileTab> {
                       backgroundColor: ColorManager.white,
                       hint: 'Enter your email address',
                       label: 'E-mail address',
-                      controller: TextEditingController(
-                          text: state.authModel?.user?.email ?? ""),
+                      controller: emailController,
                       labelTextStyle: getMediumStyle(
                           color: ColorManager.primary, fontSize: FontSize.s18),
-                      // suffixIcon: IconButton(
-                      //   icon: SvgPicture.asset(SvgAssets.edit),
-                      //   onPressed: () {
-                      //     setState(() {
-                      //       isEmailReadOnly = false;
-                      //     });
-                      //   },
-                      // ),
                       textInputType: TextInputType.emailAddress,
                       validation: AppValidators.validateEmail,
                       hintTextStyle:
@@ -198,14 +185,6 @@ class ProfileTabState extends State<ProfileTab> {
                       label: 'Your mobile number',
                       labelTextStyle: getMediumStyle(
                           color: ColorManager.primary, fontSize: FontSize.s18),
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () {
-                          setState(() {
-                            isMobileNumberReadOnly = false;
-                          });
-                        },
-                      ),
                       textInputType: TextInputType.phone,
                       validation: AppValidators.validatePhoneNumber,
                       hintTextStyle:
@@ -227,14 +206,6 @@ class ProfileTabState extends State<ProfileTab> {
                         label: 'Your Address',
                         labelTextStyle: getMediumStyle(
                             color: ColorManager.primary, fontSize: 18),
-                        // suffixIcon: IconButton(
-                        //   icon: SvgPicture.asset(SvgAssets.edit),
-                        //   onPressed: () {
-                        //     setState(() {
-                        //       isAddressReadOnly = false;
-                        //     });
-                        //   },
-                        // ),
                         textInputType: TextInputType.streetAddress,
                         validation: AppValidators.validateFullName,
                         hintTextStyle:
@@ -313,17 +284,27 @@ class ProfileTabState extends State<ProfileTab> {
                     ),
                     SizedBox(height: 25.h),
                     CustomElevatedButton(
-                      label: 'Change Password',
-                      onTap: () async {},
+                      label: 'Update Profile',
+                      onTap: () {
+                        setState(() {
+                          isFullNameReadOnly = false;
+                          isEmailReadOnly = false;
+                          isMobileNumberReadOnly = false;
+                        });
+                      },
                     ),
                     SizedBox(height: 25.h),
                     CustomElevatedButton(
                       label: 'Save Updates',
                       onTap: () async {
-                        context
-                            .read<ProfileBloc>()
-                            .add(UpdatePhoneNumberEvent(phoneController.text));
+                        context.read<ProfileBloc>().add(UpdateUserProfileEvent(
+                            User(
+                                name: nameController.text,
+                                email: emailController.text,
+                                phone: phoneController.text)));
                         setState(() {
+                          isFullNameReadOnly = true;
+                          isEmailReadOnly = true;
                           isMobileNumberReadOnly = true;
                         });
                       },

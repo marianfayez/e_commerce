@@ -58,9 +58,9 @@ class ProfileRepoImpl implements ProfileRepo {
   }
 
   @override
-  Future<Either<RouteFailures, AuthModel>> updatePhoneNumber({required String phone}) async{
+  Future<Either<RouteFailures, AuthModel>> updateUserProfile({required User user}) async{
     try {
-      var result = await profileRemoteDs.updatePhoneNumber(phone: phone);
+      var result = await profileRemoteDs.updateUserProfile(user: user);
       return Right(result);
     } catch (e) {
       print("Parsing error: $e");
