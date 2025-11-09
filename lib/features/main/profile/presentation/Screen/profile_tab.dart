@@ -59,10 +59,16 @@ class ProfileTabState extends State<ProfileTab> {
         ..add(GetAddresses()),
       child: BlocConsumer<ProfileBloc, ProfileState>(
         listener: (context, state) {
+          AppConstants.loadingDialog(
+              context,
+              state.getDataRequestState == RequestState.loading ||
+                  state.addAddressRequestState == RequestState.loading ||
+                  state.updateProfileRequestState == RequestState.loading);
           if (state.addAddressRequestState == RequestState.success) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("✅ Address added successfully")),
             );
+            context.read<ProfileBloc>().add(GetAddresses());
           }
 
           if (state.addAddressRequestState == RequestState.error) {
@@ -70,8 +76,19 @@ class ProfileTabState extends State<ProfileTab> {
               SnackBar(content: Text("❌ Failed: ${state.addAddressFailures}")),
             );
           }
-          AppConstants.loadingDialog(
-              context, state.getDataRequestState == RequestState.loading);
+          if (state.updateProfileRequestState == RequestState.success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("✅ Profile updated successfully")),
+            );
+          }
+
+          if (state.updateProfileRequestState == RequestState.error) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content:
+                      Text("❌ Update failed: ${state.updateProfileFailures}")),
+            );
+          }
         },
         builder: (context, state) {
           phoneController.text = state.authModel?.user?.phone ?? "";
@@ -83,7 +100,6 @@ class ProfileTabState extends State<ProfileTab> {
             final validAddress = state.addressModel!.data!.firstWhere(
                 (address) => address.id != null,
                 orElse: () => state.addressModel!.data!.first);
-
             addressController.text = selectedAddressText.isNotEmpty
                 ? selectedAddressText
                 : validAddress.details ?? '';
@@ -273,6 +289,7 @@ class ProfileTabState extends State<ProfileTab> {
                                               details: details,
                                               phone: phone,
                                               city: city)));
+                                      Navigator.pop(context);
                                     },
                                   ),
                                 ),
@@ -297,11 +314,38 @@ class ProfileTabState extends State<ProfileTab> {
                     CustomElevatedButton(
                       label: 'Save Updates',
                       onTap: () async {
+                        final currentUser = state.authModel?.user;
+
+                        // نقارن القيم الجديدة بالقديمة ونضيف بس اللي اتغير
+                        final String? updatedName =
+                        nameController.text.trim().isNotEmpty &&
+                            nameController.text.trim() != currentUser?.name
+                            ? nameController.text.trim()
+                            : null;
+
+                        final String? updatedEmail =
+                        emailController.text.trim().isNotEmpty &&
+                            emailController.text.trim() != currentUser?.email
+                            ? emailController.text.trim()
+                            : null;
+
+                        final String? updatedPhone =
+                        phoneController.text.trim().isNotEmpty &&
+                            phoneController.text.trim() != currentUser?.phone
+                            ? phoneController.text.trim()
+                            : null;
+
+                        // لو المستخدم مدخلش أي تغييرات
+                        if (updatedName == null && updatedEmail == null && updatedPhone == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("لم يتم تعديل أي بيانات")),
+                          );
+                          return;
+                        }
                         context.read<ProfileBloc>().add(UpdateUserProfileEvent(
-                            User(
-                                name: nameController.text,
-                                email: emailController.text,
-                                phone: phoneController.text)));
+                          name: nameController.text.isNotEmpty ? nameController.text : null,
+                          email: emailController.text.isNotEmpty ? emailController.text : null,
+                          phone: phoneController.text.isNotEmpty ? phoneController.text : null,));
                         setState(() {
                           isFullNameReadOnly = true;
                           isEmailReadOnly = true;

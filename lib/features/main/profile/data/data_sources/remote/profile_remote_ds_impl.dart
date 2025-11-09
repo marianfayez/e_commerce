@@ -105,25 +105,41 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
   }
 
   @override
-  Future<AuthModel> updateUserProfile({required User user}) async {
+  Future<AuthModel> updateUserProfile({String? name,
+    String? email,
+    String? phone,}) async {
     try {
       final prefs = await SharedPrefsHelper.getInstance();
       final token = prefs.getValue<String>('token');
+      final currentName = prefs.getValue<String>('name');
+      final currentEmail = prefs.getValue<String>('email');
 
+      final Map<String, dynamic> body = {};
+      if (currentName != null) body['name'] = name;
+      if (currentEmail != null && email !=currentEmail) {
+        body['email'] = email;
+      }
+      if (body.isEmpty) {
+        throw Exception('No fields provided to update');
+      }
       var response = await apiManager
-          .putData(EndPoints.updateProfile, body: user.toJson(), headers: {
+          .putData(EndPoints.updateProfile, body: body, headers: {
         "token": token,
       });
       final authModel = AuthModel.fromJson(response.data);
+
       return authModel;
     } on DioException catch (e) {
       String message = "Something went wrong";
-
       if (e.response?.data != null) {
         final data = e.response!.data;
         if (data is Map && data.containsKey("errors")) {
-          // ✅ السيرفر بيرجع errors في شكل {"errors": {"msg": "..."}}
-          message = data["errors"]["msg"] ?? data["message"] ?? message;
+          final errors = data["errors"];
+          if (errors is Map && errors.containsKey("msg")) {
+            message = errors["msg"];
+          } else if (errors is String) {
+            message = errors;
+          }
         } else if (data is Map && data.containsKey("message")) {
           message = data["message"];
         }

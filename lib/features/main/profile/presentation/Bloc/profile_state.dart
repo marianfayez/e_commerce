@@ -1,18 +1,20 @@
 import 'package:e_commerce_app/core/failuers/failuers.dart';
 import 'package:e_commerce_app/features/auth/data/models/auth_model.dart';
 import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
-import 'package:e_commerce_app/features/main/profile/presentation/Bloc/profile_bloc.dart';
 
 enum RequestState { init, loading, error, success }
 
 class ProfileState {
   AuthModel? authModel;
   AddressModel? addressModel;
+
   RequestState? getDataRequestState;
   RequestState? addAddressRequestState;
   RequestState? getAddressRequestState;
   RequestState? deleteAddressRequestState;
+  RequestState? updateProfileRequestState;
 
+  RouteFailures? updateProfileFailures;
   RouteFailures? routeFailures;
   RouteFailures? addAddressFailures;
   RouteFailures? getAddressFailures;
@@ -23,9 +25,12 @@ class ProfileState {
       this.getDataRequestState,
       this.authModel,
       this.addressModel,
+      this.updateProfileRequestState,
+      this.updateProfileFailures,
       this.getAddressRequestState,
       this.getAddressFailures,
-        this.deleteAddressRequestState,this.deleteAddressFailures,
+      this.deleteAddressRequestState,
+      this.deleteAddressFailures,
       this.addAddressRequestState,
       this.addAddressFailures});
 
@@ -39,13 +44,20 @@ class ProfileState {
     RouteFailures? addAddressFailures,
     RouteFailures? deleteAddressFailures,
     RouteFailures? routeFailures,
+    RouteFailures? updateProfileFailures,
     RequestState? getDataRequestState,
+    RequestState? updateProfileRequestState,
   }) {
     return ProfileState(
         getAddressFailures: getAddressFailures ?? this.getAddressFailures,
-        deleteAddressFailures: deleteAddressFailures ?? this.deleteAddressFailures,
-        deleteAddressRequestState: deleteAddressRequestState ?? this.deleteAddressRequestState,
-
+        updateProfileRequestState:
+            updateProfileRequestState ?? this.updateProfileRequestState,
+        updateProfileFailures:
+            updateProfileFailures ?? this.updateProfileFailures,
+        deleteAddressFailures:
+            deleteAddressFailures ?? this.deleteAddressFailures,
+        deleteAddressRequestState:
+            deleteAddressRequestState ?? this.deleteAddressRequestState,
         getAddressRequestState:
             getAddressRequestState ?? this.getAddressRequestState,
         addressModel: addressModel ?? this.addressModel,
@@ -61,7 +73,6 @@ class ProfileState {
 final class ProfileInitial extends ProfileState {
   ProfileInitial()
       : super(
-            getDataRequestState: RequestState.init,
-            addAddressRequestState: RequestState.init,
-            getAddressRequestState: RequestState.init);
+          getDataRequestState: RequestState.init,
+        );
 }

@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:e_commerce_app/core/failuers/failuers.dart';
 import 'package:e_commerce_app/core/failuers/remote_failuers.dart';
+import 'package:e_commerce_app/core/resources/cache_helper.dart';
 
 import 'package:e_commerce_app/features/auth/data/models/auth_model.dart';
 
@@ -58,9 +59,15 @@ class ProfileRepoImpl implements ProfileRepo {
   }
 
   @override
-  Future<Either<RouteFailures, AuthModel>> updateUserProfile({required User user}) async{
+  Future<Either<RouteFailures, AuthModel>> updateUserProfile({String? name,
+    String? email,
+    String? phone}) async{
     try {
-      var result = await profileRemoteDs.updateUserProfile(user: user);
+      var result = await profileRemoteDs.updateUserProfile(name: name,email: email,phone: phone);
+      final prefs = await SharedPrefsHelper.getInstance();
+      await prefs.setValue<String>('name', result.user?.name ?? '');
+      await prefs.setValue<String>('email', result.user?.email ?? '');
+      await prefs.setValue<String>('phone', result.user?.phone ?? phone ?? '');
       return Right(result);
     } catch (e) {
       print("Parsing error: $e");
