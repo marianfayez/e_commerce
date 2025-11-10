@@ -8,12 +8,12 @@ import 'package:e_commerce_app/core/widgets/custom_elevated_button.dart';
 import 'package:e_commerce_app/core/widgets/main_text_field.dart';
 import 'package:e_commerce_app/core/widgets/validators.dart';
 import 'package:e_commerce_app/di.dart';
-import 'package:e_commerce_app/features/auth/data/models/auth_model.dart';
 import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/Bloc/profile_bloc.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/Bloc/profile_state.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/widgets/AddAddressSheet.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/widgets/AddressDialog.dart';
+import 'package:e_commerce_app/features/main/profile/presentation/widgets/ProfileInfoSection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -64,12 +64,6 @@ class ProfileTabState extends State<ProfileTab> {
               state.getDataRequestState == RequestState.loading ||
                   state.addAddressRequestState == RequestState.loading ||
                   state.updateProfileRequestState == RequestState.loading);
-          if (state.addAddressRequestState == RequestState.success) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("✅ Address added successfully")),
-            );
-            context.read<ProfileBloc>().add(GetAddresses());
-          }
 
           if (state.addAddressRequestState == RequestState.error) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -132,38 +126,22 @@ class ProfileTabState extends State<ProfileTab> {
                           fontSize: FontSize.s14),
                     ),
                     SizedBox(height: 18.h),
-                    BuildTextField(
-                      borderBackgroundColor:
-                          ColorManager.primary.withOpacity(.5),
-                      readOnly: isFullNameReadOnly,
-                      backgroundColor: ColorManager.white,
-                      hint: 'Enter your full name',
+                    ProfileInfoSection(
                       label: 'Full Name',
+                      value: nameController.text,
                       controller: nameController,
-                      labelTextStyle: getMediumStyle(
-                          color: ColorManager.primary, fontSize: FontSize.s18),
-                      textInputType: TextInputType.text,
-                      validation: AppValidators.validateFullName,
-                      hintTextStyle:
-                          getRegularStyle(color: ColorManager.primary)
-                              .copyWith(fontSize: 18.sp),
+                      isEditing: !isFullNameReadOnly,
+                      icon: Icons.person,
+                      inputType: TextInputType.name,
                     ),
                     SizedBox(height: 18.h),
-                    BuildTextField(
-                      borderBackgroundColor:
-                          ColorManager.primary.withOpacity(.5),
-                      readOnly: isEmailReadOnly,
-                      backgroundColor: ColorManager.white,
-                      hint: 'Enter your email address',
-                      label: 'E-mail address',
+                    ProfileInfoSection(
+                      label: 'Email',
+                      value: emailController.text,
                       controller: emailController,
-                      labelTextStyle: getMediumStyle(
-                          color: ColorManager.primary, fontSize: FontSize.s18),
-                      textInputType: TextInputType.emailAddress,
-                      validation: AppValidators.validateEmail,
-                      hintTextStyle:
-                          getRegularStyle(color: ColorManager.primary)
-                              .copyWith(fontSize: 18.sp),
+                      isEditing: !isEmailReadOnly,
+                      icon: Icons.email,
+                      inputType: TextInputType.emailAddress,
                     ),
                     // SizedBox(height: 18.h),
                     // BuildTextField(
@@ -191,42 +169,26 @@ class ProfileTabState extends State<ProfileTab> {
                     //           .copyWith(fontSize: 18.sp),
                     // ),
                     SizedBox(height: 18.h),
-                    BuildTextField(
+                    ProfileInfoSection(
+                      label: 'Mobile Number',
+                      value: phoneController.text,
                       controller: phoneController,
-                      borderBackgroundColor:
-                          ColorManager.primary.withOpacity(.5),
-                      readOnly: isMobileNumberReadOnly,
-                      backgroundColor: ColorManager.white,
-                      hint: 'Enter your mobile no.',
-                      label: 'Your mobile number',
-                      labelTextStyle: getMediumStyle(
-                          color: ColorManager.primary, fontSize: FontSize.s18),
-                      textInputType: TextInputType.phone,
-                      validation: AppValidators.validatePhoneNumber,
-                      hintTextStyle:
-                          getRegularStyle(color: ColorManager.primary)
-                              .copyWith(fontSize: 18.sp),
+                      isEditing: !isMobileNumberReadOnly,
+                      icon: Icons.phone,
+                      inputType: TextInputType.phone,
                     ),
                     SizedBox(height: 18.h),
                     if (state.addressModel?.data != null &&
                         state.addressModel!.data!.isNotEmpty &&
                         state.addressModel!.data!
                             .any((address) => address.id != null))
-                      BuildTextField(
+                      ProfileInfoSection(
+                        label: 'Address',
+                        value: addressController.text,
                         controller: addressController,
-                        borderBackgroundColor:
-                            ColorManager.primary.withOpacity(.5),
-                        readOnly: isAddressReadOnly,
-                        backgroundColor: ColorManager.white,
-                        hint: 'Address',
-                        label: 'Your Address',
-                        labelTextStyle: getMediumStyle(
-                            color: ColorManager.primary, fontSize: 18),
-                        textInputType: TextInputType.streetAddress,
-                        validation: AppValidators.validateFullName,
-                        hintTextStyle:
-                            getRegularStyle(color: ColorManager.primary)
-                                .copyWith(fontSize: 18.sp),
+                        isEditing: !isAddressReadOnly,
+                        icon: Icons.location_on,
+                        inputType: TextInputType.streetAddress,
                       ),
                     SizedBox(height: 50.h),
                     CustomElevatedButton(
@@ -282,14 +244,14 @@ class ProfileTabState extends State<ProfileTab> {
                                 ),
                                 child: SingleChildScrollView(
                                   child: AddAddressSheet(
-                                    onSave: (name, details, phone, city) {
+                                    onSave: (name, details, phone, city) async{
                                       blocContext.read<ProfileBloc>().add(
                                           AddAddress(AddressData(
                                               name: name,
                                               details: details,
                                               phone: phone,
                                               city: city)));
-                                      Navigator.pop(context);
+
                                     },
                                   ),
                                 ),
@@ -300,58 +262,78 @@ class ProfileTabState extends State<ProfileTab> {
                       },
                     ),
                     SizedBox(height: 25.h),
-                    CustomElevatedButton(
-                      label: 'Update Profile',
-                      onTap: () {
-                        setState(() {
-                          isFullNameReadOnly = false;
-                          isEmailReadOnly = false;
-                          isMobileNumberReadOnly = false;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 25.h),
-                    CustomElevatedButton(
-                      label: 'Save Updates',
-                      onTap: () async {
-                        final currentUser = state.authModel?.user;
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CustomElevatedButton(
+                            label: isFullNameReadOnly
+                                ? 'Update Profile'
+                                : 'Cancel',
+                            onTap: () {
+                              setState(() {
+                                final editing = isFullNameReadOnly;
+                                isFullNameReadOnly = !editing;
+                                isEmailReadOnly = !editing;
+                                isMobileNumberReadOnly = !editing;
+                                isAddressReadOnly = !editing;
+                              });
+                            },
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        if (!isFullNameReadOnly)
+                          CustomElevatedButton(
+                            label: 'Save Changes',
+                            onTap: () {
+                              final currentUser = state.authModel?.user;
 
-                        // نقارن القيم الجديدة بالقديمة ونضيف بس اللي اتغير
-                        final String? updatedName =
-                        nameController.text.trim().isNotEmpty &&
-                            nameController.text.trim() != currentUser?.name
-                            ? nameController.text.trim()
-                            : null;
+                              final String? updatedName = nameController.text
+                                  .trim()
+                                  .isNotEmpty &&
+                                  nameController.text.trim() != currentUser?.name
+                                  ? nameController.text.trim()
+                                  : null;
 
-                        final String? updatedEmail =
-                        emailController.text.trim().isNotEmpty &&
-                            emailController.text.trim() != currentUser?.email
-                            ? emailController.text.trim()
-                            : null;
+                              final String? updatedEmail =
+                              emailController.text.trim().isNotEmpty &&
+                                  emailController.text.trim() !=
+                                      currentUser?.email
+                                  ? emailController.text.trim()
+                                  : null;
 
-                        final String? updatedPhone =
-                        phoneController.text.trim().isNotEmpty &&
-                            phoneController.text.trim() != currentUser?.phone
-                            ? phoneController.text.trim()
-                            : null;
+                              final String? updatedPhone =
+                              phoneController.text.trim().isNotEmpty &&
+                                  phoneController.text.trim() !=
+                                      currentUser?.phone
+                                  ? phoneController.text.trim()
+                                  : null;
 
-                        // لو المستخدم مدخلش أي تغييرات
-                        if (updatedName == null && updatedEmail == null && updatedPhone == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("لم يتم تعديل أي بيانات")),
-                          );
-                          return;
-                        }
-                        context.read<ProfileBloc>().add(UpdateUserProfileEvent(
-                          name: nameController.text.isNotEmpty ? nameController.text : null,
-                          email: emailController.text.isNotEmpty ? emailController.text : null,
-                          phone: phoneController.text.isNotEmpty ? phoneController.text : null,));
-                        setState(() {
-                          isFullNameReadOnly = true;
-                          isEmailReadOnly = true;
-                          isMobileNumberReadOnly = true;
-                        });
-                      },
+                              if (updatedName == null &&
+                                  updatedEmail == null &&
+                                  updatedPhone == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text("No changes")),
+                                );
+                                return;
+                              }
+                              context.read<ProfileBloc>().add(UpdateUserProfileEvent(
+                                name: nameController.text.isNotEmpty
+                                    ? nameController.text
+                                    : null,
+                                email: emailController.text.isNotEmpty
+                                    ? emailController.text
+                                    : null,
+                                phone: phoneController.text.isNotEmpty
+                                    ? phoneController.text
+                                    : null,
+                              ));
+                              setState(() {
+                                isFullNameReadOnly = true;
+                                isEmailReadOnly = true;
+                                isMobileNumberReadOnly = true;
+                              });                              },
+                          ),
+                      ],
                     ),
                     SizedBox(height: 25.h),
 

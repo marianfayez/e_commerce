@@ -41,17 +41,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<AddAddress>((event, emit) async {
       emit(state.copyWith(addAddressRequestState: RequestState.loading));
       var result = await addAddressUseCase.call(model: event.model);
-
       return result.fold((error) {
         print("🔴 Failed to add address: $error");
-
         emit(state.copyWith(
             addAddressRequestState: RequestState.error,
             addAddressFailures: error));
       }, (result) async {
         print("🟢 Address added successfully, refreshing...");
         result.data?.removeWhere((address) => address.id == null);
-
         final refreshedAddress = await addAddressUseCase.getAddress();
         refreshedAddress.fold((err) {
           emit(state.copyWith(
@@ -65,8 +62,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             getAddressRequestState: RequestState.success,
             addressModel: updatedAddress,
           ));
-          await Future.delayed(const Duration(milliseconds: 300));
-          emit(state.copyWith(addAddressRequestState: RequestState.init));
+          // await Future.delayed(const Duration(milliseconds: 300));
+          // emit(state.copyWith(addAddressRequestState: RequestState.init));
         });
       });
     });
