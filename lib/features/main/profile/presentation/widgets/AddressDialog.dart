@@ -1,6 +1,7 @@
 import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/Bloc/profile_bloc.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/widgets/AddAddressSheet.dart';
+import 'package:e_commerce_app/features/main/profile/presentation/widgets/customFormSheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -144,20 +145,34 @@ class _AddressDialogState extends State<AddressDialog> {
               shape:  RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
               ),
-              builder: (sheetCtx) {
-                return Padding(
-                  padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(sheetCtx).viewInsets.bottom,
-                  ),
-                  child: SingleChildScrollView(
-                    child: AddAddressSheet(
-                      onSave: (name, details, phone, city) {
-                        widget.onSave?.call(name, details, phone, city);
-                      },
-                    ),
-                  ),
-                );
-              },
+              builder: (_) => SingleChildScrollView(
+                child: CustomFormSheet(
+                  title: "Add Address",
+                  fields: [
+                    FormFieldData(key: "name", label: "Home/Work/..", controller: TextEditingController()),
+                    FormFieldData(key: "details", label: "Street Name", controller: TextEditingController()),
+                    FormFieldData(key: "phone", label: "Phone", controller: TextEditingController(), inputType: TextInputType.phone),
+                    FormFieldData(key: "city", label: "City", controller: TextEditingController()),
+                  ],
+                  onSave: (values) {
+                     widget.onSave?.call(values["name"]!, values["details"]!, values["phone"]!, values["city"]!);
+                  },
+                ),
+              ),
+              // builder: (sheetCtx) {
+              //   return Padding(
+              //     padding: EdgeInsets.only(
+              //       bottom: MediaQuery.of(sheetCtx).viewInsets.bottom,
+              //     ),
+              //     child: SingleChildScrollView(
+              //       child: AddAddressSheet(
+              //         onSave: (name, details, phone, city) {
+              //           widget.onSave?.call(name, details, phone, city);
+              //         },
+              //       ),
+              //     ),
+              //   );
+              // },
             );
           },
           child: const Text('Add New Address'),
