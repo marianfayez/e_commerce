@@ -7,6 +7,7 @@ import 'package:e_commerce_app/features/auth/data/models/auth_model.dart';
 import 'package:e_commerce_app/features/auth/data/models/sign_up_request_model.dart';
 import 'package:e_commerce_app/features/main/profile/data/data_sources/remote/profile_remote_ds.dart';
 import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
+import 'package:e_commerce_app/features/main/profile/data/models/changePassword.dart';
 import 'package:injectable/injectable.dart';
 
 @Injectable(as: ProfileRemoteDs)
@@ -105,9 +106,7 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
   }
 
   @override
-  Future<AuthModel> updateUserProfile({String? name,
-    String? email,
-    String? phone,}) async {
+  Future<AuthModel> updateUserProfile({String? name, String? email, String? phone,}) async {
     try {
       final prefs = await SharedPrefsHelper.getInstance();
       final token = prefs.getValue<String>('token');
@@ -147,6 +146,24 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
       throw Exception(message);
     } catch (e) {
       throw Exception(e.toString());
+    }
+  }
+
+  @override
+  Future<AuthModel> changePassword({required ChangePasswordModel model}) async{
+    try {
+      final prefs = await SharedPrefsHelper.getInstance();
+      final token = prefs.getValue<String>('token');
+      var response = await apiManager
+          .putData(EndPoints.changeMyPassword, body: model.toJson(), headers: {
+        "token": token,
+      });
+      final authModel = AuthModel.fromJson(response.data);
+      return authModel;
+    } on DioException catch (e) {
+      final errorMessage = e.error?.toString() ?? 'Unknown error occurred';
+      throw Exception(
+          errorMessage); // or rethrow with ServerFailure if using Either
     }
   }
 }

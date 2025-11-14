@@ -5,13 +5,11 @@ import 'package:e_commerce_app/core/resources/font_manager.dart';
 import 'package:e_commerce_app/core/resources/styles_manager.dart';
 import 'package:e_commerce_app/core/routes/auto_route.gr.dart';
 import 'package:e_commerce_app/core/widgets/custom_elevated_button.dart';
-import 'package:e_commerce_app/core/widgets/main_text_field.dart';
-import 'package:e_commerce_app/core/widgets/validators.dart';
 import 'package:e_commerce_app/di.dart';
 import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
+import 'package:e_commerce_app/features/main/profile/data/models/changePassword.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/Bloc/profile_bloc.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/Bloc/profile_state.dart';
-import 'package:e_commerce_app/features/main/profile/presentation/widgets/AddAddressSheet.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/widgets/AddressDialog.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/widgets/ProfileInfoSection.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/widgets/customFormSheet.dart';
@@ -241,44 +239,38 @@ class ProfileTabState extends State<ProfileTab> {
                               child: CustomFormSheet(
                                 title: "Add Address",
                                 fields: [
-                                  FormFieldData(key: "name", label: "Home/Work/..", controller: TextEditingController()),
-                                  FormFieldData(key: "details", label: "Street Name", controller: TextEditingController()),
-                                  FormFieldData(key: "phone", label: "Phone", controller: TextEditingController(), inputType: TextInputType.phone),
-                                  FormFieldData(key: "city", label: "City", controller: TextEditingController()),
+                                  FormFieldData(
+                                      key: "name",
+                                      label: "Home/Work/..",
+                                      controller: TextEditingController()),
+                                  FormFieldData(
+                                      key: "details",
+                                      label: "Street Name",
+                                      controller: TextEditingController()),
+                                  FormFieldData(
+                                      key: "phone",
+                                      label: "Phone",
+                                      controller: TextEditingController(),
+                                      inputType: TextInputType.phone),
+                                  FormFieldData(
+                                      key: "city",
+                                      label: "City",
+                                      controller: TextEditingController()),
                                 ],
                                 onSave: (values) {
-                                  blocContext.read<ProfileBloc>().add(AddAddress(
-                                    AddressData(
-                                      name: values["name"]!,
-                                      details: values["details"]!,
-                                      phone: values["phone"]!,
-                                      city: values["city"]!,
-                                    ),
-                                  ));
+                                  blocContext
+                                      .read<ProfileBloc>()
+                                      .add(AddAddress(
+                                        AddressData(
+                                          name: values["name"]!,
+                                          details: values["details"]!,
+                                          phone: values["phone"]!,
+                                          city: values["city"]!,
+                                        ),
+                                      ));
                                 },
                               ),
                             ),
-                            // builder: (context) {
-                            //   return Padding(
-                            //     padding: EdgeInsets.only(
-                            //       bottom:
-                            //           MediaQuery.of(context).viewInsets.bottom,
-                            //     ),
-                            //     child: SingleChildScrollView(
-                            //       child: AddAddressSheet(
-                            //         onSave: (name, details, phone, city) async{
-                            //           blocContext.read<ProfileBloc>().add(
-                            //               AddAddress(AddressData(
-                            //                   name: name,
-                            //                   details: details,
-                            //                   phone: phone,
-                            //                   city: city)));
-                            //
-                            //         },
-                            //       ),
-                            //     ),
-                            //   );
-                            // },
                           );
                         }
                       },
@@ -309,26 +301,26 @@ class ProfileTabState extends State<ProfileTab> {
                             onTap: () {
                               final currentUser = state.authModel?.user;
 
-                              final String? updatedName = nameController.text
-                                  .trim()
-                                  .isNotEmpty &&
-                                  nameController.text.trim() != currentUser?.name
-                                  ? nameController.text.trim()
-                                  : null;
+                              final String? updatedName =
+                                  nameController.text.trim().isNotEmpty &&
+                                          nameController.text.trim() !=
+                                              currentUser?.name
+                                      ? nameController.text.trim()
+                                      : null;
 
                               final String? updatedEmail =
-                              emailController.text.trim().isNotEmpty &&
-                                  emailController.text.trim() !=
-                                      currentUser?.email
-                                  ? emailController.text.trim()
-                                  : null;
+                                  emailController.text.trim().isNotEmpty &&
+                                          emailController.text.trim() !=
+                                              currentUser?.email
+                                      ? emailController.text.trim()
+                                      : null;
 
                               final String? updatedPhone =
-                              phoneController.text.trim().isNotEmpty &&
-                                  phoneController.text.trim() !=
-                                      currentUser?.phone
-                                  ? phoneController.text.trim()
-                                  : null;
+                                  phoneController.text.trim().isNotEmpty &&
+                                          phoneController.text.trim() !=
+                                              currentUser?.phone
+                                      ? phoneController.text.trim()
+                                      : null;
 
                               if (updatedName == null &&
                                   updatedEmail == null &&
@@ -338,24 +330,77 @@ class ProfileTabState extends State<ProfileTab> {
                                 );
                                 return;
                               }
-                              context.read<ProfileBloc>().add(UpdateUserProfileEvent(
-                                name: nameController.text.isNotEmpty
-                                    ? nameController.text
-                                    : null,
-                                email: emailController.text.isNotEmpty
-                                    ? emailController.text
-                                    : null,
-                                phone: phoneController.text.isNotEmpty
-                                    ? phoneController.text
-                                    : null,
-                              ));
+                              context
+                                  .read<ProfileBloc>()
+                                  .add(UpdateUserProfileEvent(
+                                    name: nameController.text.isNotEmpty
+                                        ? nameController.text
+                                        : null,
+                                    email: emailController.text.isNotEmpty
+                                        ? emailController.text
+                                        : null,
+                                    phone: phoneController.text.isNotEmpty
+                                        ? phoneController.text
+                                        : null,
+                                  ));
                               setState(() {
                                 isFullNameReadOnly = true;
                                 isEmailReadOnly = true;
                                 isMobileNumberReadOnly = true;
-                              });                              },
+                              });
+                            },
                           ),
                       ],
+                    ),
+                    SizedBox(height: 25.h),
+                    CustomElevatedButton(
+                      label: 'Change Password',
+                      onTap: () async {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (_) => SingleChildScrollView(
+                            child: CustomFormSheet(
+                              title: "Change Password",
+                              fields: [
+                                FormFieldData(
+                                  key: "currentPassword",
+                                  label: "Current Password",
+                                  controller: TextEditingController(),
+                                  isPassword: true,
+                                ),
+                                FormFieldData(
+                                  key: "password",
+                                  label: "New Password",
+                                  controller: TextEditingController(),
+                                  isPassword: true,
+                                ),
+                                FormFieldData(
+                                  key: "rePassword",
+                                  label: "Confirm Password",
+                                  controller: TextEditingController(),
+                                  isPassword: true,
+                                  validator: (value) {
+                                    // هنا تقدري تعملي تطابق الباسورد
+                                    return null;
+                                  },
+                                ),
+                              ],
+                              onSave: (values) {
+                                context.read<ProfileBloc>().add(
+                                      ChangePasswordEvent(
+                                          model: ChangePasswordModel(
+                                        currentPassword:
+                                            values["currentPassword"]!,
+                                        password: values["password"]!,
+                                        rePassword: values["rePassword"]!,
+                                      )),
+                                    );
+                              },
+                            ),
+                          ),
+                        );
+                      },
                     ),
                     SizedBox(height: 25.h),
 

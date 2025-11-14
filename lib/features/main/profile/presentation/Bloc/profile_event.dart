@@ -15,10 +15,19 @@ class DeleteAddressEvent extends ProfileEvent {
 
   DeleteAddressEvent({required this.id});
 }
+
 class UpdateUserProfileEvent extends ProfileEvent {
   String? name;
-      String? email;
-   String? phone;
+  String? email;
+  String? phone;
+
   UpdateUserProfileEvent({this.name, this.phone, this.email});
 }
+
 class GetAddresses extends ProfileEvent {}
+
+class ChangePasswordEvent extends ProfileEvent {
+  ChangePasswordModel model;
+
+  ChangePasswordEvent({required this.model});
+}

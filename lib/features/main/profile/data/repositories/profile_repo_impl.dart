@@ -7,6 +7,7 @@ import 'package:e_commerce_app/features/auth/data/models/auth_model.dart';
 
 import 'package:e_commerce_app/features/main/profile/data/data_sources/remote/profile_remote_ds.dart';
 import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
+import 'package:e_commerce_app/features/main/profile/data/models/changePassword.dart';
 import 'package:e_commerce_app/features/main/profile/domain/repositories/profile_repo.dart';
 import 'package:injectable/injectable.dart';
 
@@ -71,6 +72,16 @@ class ProfileRepoImpl implements ProfileRepo {
       return Right(result);
     } catch (e) {
       print("Parsing error: $e");
+      return Left(RemoteFailures(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<RouteFailures, AuthModel>> changePassword(ChangePasswordModel model) async{
+    try {
+      var result = await profileRemoteDs.profile();
+      return Right(result);
+    } catch (e) {
       return Left(RemoteFailures(e.toString()));
     }
   }

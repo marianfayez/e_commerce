@@ -1,7 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:e_commerce_app/features/auth/data/models/auth_model.dart';
 import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
+import 'package:e_commerce_app/features/main/profile/data/models/changePassword.dart';
 import 'package:e_commerce_app/features/main/profile/domain/use_cases/add_address_use_case.dart';
+import 'package:e_commerce_app/features/main/profile/domain/use_cases/change_password_usecase.dart';
 import 'package:e_commerce_app/features/main/profile/domain/use_cases/delete_address_use_case.dart';
 import 'package:e_commerce_app/features/main/profile/domain/use_cases/profile_use-case.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/Bloc/profile_state.dart';
@@ -14,9 +16,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ProfileUseCase profileUseCase;
   AddAddressUseCase addAddressUseCase;
   DeleteAddressUseCase deleteAddressUseCase;
+  ChangePasswordUseCase changePasswordUseCase;
 
   ProfileBloc(this.profileUseCase, this.addAddressUseCase,
-      this.deleteAddressUseCase) : super(ProfileInitial()) {
+      this.deleteAddressUseCase,this.changePasswordUseCase) : super(ProfileInitial()) {
     on<ProfileEvent>((event, emit) {
       // TODO: implement event handler
     });
@@ -152,4 +155,23 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         });
       });
     });
-  }}
+
+    on<ChangePasswordEvent>((event, emit) async {
+
+      emit(state.copyWith(changePasswordRequestState: RequestState.loading));
+      var result = await changePasswordUseCase.call(event.model);
+
+      return result.fold((error) {
+        print("🔴 Error while changing password: $error");
+
+        emit(state.copyWith(
+            changePasswordRequestState: RequestState.error,
+            changePasswordFailures: error));
+      }, (result) {
+        print("🟢 password changed successfully");
+        emit(state.copyWith(
+            changePasswordRequestState: RequestState.success,
+            authModel: result
+        ));
+      });
+  });}}

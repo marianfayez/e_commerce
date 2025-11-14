@@ -1,6 +1,7 @@
 import 'package:e_commerce_app/core/failuers/failuers.dart';
 import 'package:e_commerce_app/features/auth/data/models/auth_model.dart';
 import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
+import 'package:e_commerce_app/features/main/profile/data/models/changePassword.dart';
 
 enum RequestState { init, loading, error, success }
 
@@ -13,7 +14,9 @@ class ProfileState {
   RequestState? getAddressRequestState;
   RequestState? deleteAddressRequestState;
   RequestState? updateProfileRequestState;
+  RequestState? changePasswordRequestState;
 
+  RouteFailures? changePasswordFailures;
   RouteFailures? updateProfileFailures;
   RouteFailures? routeFailures;
   RouteFailures? addAddressFailures;
@@ -25,6 +28,7 @@ class ProfileState {
       this.getDataRequestState,
       this.authModel,
       this.addressModel,
+        this.changePasswordFailures,this.changePasswordRequestState,
       this.updateProfileRequestState,
       this.updateProfileFailures,
       this.getAddressRequestState,
@@ -38,7 +42,8 @@ class ProfileState {
     AuthModel? authModel,
     AddressModel? addressModel,
     RequestState? getAddressRequestState,
-    RouteFailures? getAddressFailures,
+    RouteFailures? getAddressFailures,    RequestState? changePasswordRequestState,
+    RouteFailures? changePasswordFailures,
     RequestState? addAddressRequestState,
     RequestState? deleteAddressRequestState,
     RouteFailures? addAddressFailures,
@@ -49,6 +54,9 @@ class ProfileState {
     RequestState? updateProfileRequestState,
   }) {
     return ProfileState(
+        changePasswordFailures: changePasswordFailures ?? this.changePasswordFailures,
+        changePasswordRequestState:
+        changePasswordRequestState ?? this.changePasswordRequestState,
         getAddressFailures: getAddressFailures ?? this.getAddressFailures,
         updateProfileRequestState:
             updateProfileRequestState ?? this.updateProfileRequestState,
