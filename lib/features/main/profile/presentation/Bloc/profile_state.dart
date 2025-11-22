@@ -9,6 +9,8 @@ class ProfileState {
   AuthModel? authModel;
   AddressModel? addressModel;
 
+  final bool isLoggedOut;
+
   RequestState? getDataRequestState;
   RequestState? addAddressRequestState;
   RequestState? getAddressRequestState;
@@ -27,8 +29,10 @@ class ProfileState {
       {this.routeFailures,
       this.getDataRequestState,
       this.authModel,
+      this.isLoggedOut = false,
       this.addressModel,
-        this.changePasswordFailures,this.changePasswordRequestState,
+      this.changePasswordFailures,
+      this.changePasswordRequestState,
       this.updateProfileRequestState,
       this.updateProfileFailures,
       this.getAddressRequestState,
@@ -40,9 +44,11 @@ class ProfileState {
 
   ProfileState copyWith({
     AuthModel? authModel,
+    bool? isLoggedOut,
     AddressModel? addressModel,
     RequestState? getAddressRequestState,
-    RouteFailures? getAddressFailures,    RequestState? changePasswordRequestState,
+    RouteFailures? getAddressFailures,
+    RequestState? changePasswordRequestState,
     RouteFailures? changePasswordFailures,
     RequestState? addAddressRequestState,
     RequestState? deleteAddressRequestState,
@@ -54,9 +60,11 @@ class ProfileState {
     RequestState? updateProfileRequestState,
   }) {
     return ProfileState(
-        changePasswordFailures: changePasswordFailures ?? this.changePasswordFailures,
+        isLoggedOut: isLoggedOut ?? this.isLoggedOut,
+        changePasswordFailures:
+            changePasswordFailures ?? this.changePasswordFailures,
         changePasswordRequestState:
-        changePasswordRequestState ?? this.changePasswordRequestState,
+            changePasswordRequestState ?? this.changePasswordRequestState,
         getAddressFailures: getAddressFailures ?? this.getAddressFailures,
         updateProfileRequestState:
             updateProfileRequestState ?? this.updateProfileRequestState,
@@ -82,5 +90,6 @@ final class ProfileInitial extends ProfileState {
   ProfileInitial()
       : super(
           getDataRequestState: RequestState.init,
+          isLoggedOut: false,
         );
 }

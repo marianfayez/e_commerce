@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:e_commerce_app/core/failuers/failuers.dart';
 import 'package:e_commerce_app/core/failuers/remote_failuers.dart';
 import 'package:e_commerce_app/core/resources/cache_helper.dart';
@@ -17,13 +18,41 @@ class ProfileRepoImpl implements ProfileRepo {
 
   ProfileRepoImpl(this.profileRemoteDs);
 
+  RouteFailures _handleError(dynamic e) {
+    print("🔥 Caught error: ${e.runtimeType}");
+
+    if (e is DioException ) {
+      final rawMsg = e.response?.data["message"] ?? "Something went wrong";
+      final msg = rawMsg.toString().toLowerCase().trim();
+      final status = e.response?.statusCode;
+      print("🔥 Server error message = $rawMsg");
+
+      if (status == 401 && msg.contains("user recently changed password")) {
+        return UnauthorizedFailure(rawMsg);
+      }
+
+      return RemoteFailures(rawMsg);
+    }
+    if (e is Exception) {
+      final msg = e.toString().toLowerCase();
+      if (msg.contains("user recently changed password") ||
+          msg.contains("401")) {
+        return UnauthorizedFailure("Session expired! Please login again.");
+      }
+      return RemoteFailures(e.toString());
+    }
+
+    return RemoteFailures("Unexpected Error");
+
+  }
+
   @override
   Future<Either<RouteFailures, AuthModel>> profile() async {
     try {
       var result = await profileRemoteDs.profile();
       return Right(result);
     } catch (e) {
-      return Left(RemoteFailures(e.toString()));
+      return Left(_handleError(e));
     }
   }
 
@@ -34,7 +63,7 @@ class ProfileRepoImpl implements ProfileRepo {
       var result = await profileRemoteDs.addAddress(model: model);
       return Right(result);
     } catch (e) {
-      return Left(RemoteFailures(e.toString()));
+      return Left(_handleError(e));
     }
   }
 
@@ -44,7 +73,7 @@ class ProfileRepoImpl implements ProfileRepo {
       var result = await profileRemoteDs.getAddresses();
       return Right(result);
     } catch (e) {
-      return Left(RemoteFailures(e.toString()));
+      return Left(_handleError(e));
     }
   }
 
@@ -55,7 +84,7 @@ class ProfileRepoImpl implements ProfileRepo {
       return Right(result);
     } catch (e) {
       print("Parsing error: $e");
-      return Left(RemoteFailures(e.toString()));
+      return Left(_handleError(e));
     }
   }
 
@@ -72,17 +101,17 @@ class ProfileRepoImpl implements ProfileRepo {
       return Right(result);
     } catch (e) {
       print("Parsing error: $e");
-      return Left(RemoteFailures(e.toString()));
+      return Left(_handleError(e));
     }
   }
 
   @override
   Future<Either<RouteFailures, AuthModel>> changePassword(ChangePasswordModel model) async{
     try {
-      var result = await profileRemoteDs.profile();
+      var result = await profileRemoteDs.changePassword(model: model);
       return Right(result);
     } catch (e) {
-      return Left(RemoteFailures(e.toString()));
+      return Left(_handleError(e));
     }
   }
 }

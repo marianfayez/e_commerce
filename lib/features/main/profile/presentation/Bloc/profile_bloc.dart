@@ -1,4 +1,6 @@
 import 'package:bloc/bloc.dart';
+import 'package:e_commerce_app/core/failuers/remote_failuers.dart';
+import 'package:e_commerce_app/core/resources/cache_helper.dart';
 import 'package:e_commerce_app/features/auth/data/models/auth_model.dart';
 import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
 import 'package:e_commerce_app/features/main/profile/data/models/changePassword.dart';
@@ -19,7 +21,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ChangePasswordUseCase changePasswordUseCase;
 
   ProfileBloc(this.profileUseCase, this.addAddressUseCase,
-      this.deleteAddressUseCase,this.changePasswordUseCase) : super(ProfileInitial()) {
+      this.deleteAddressUseCase, this.changePasswordUseCase)
+      : super(ProfileInitial()) {
     on<ProfileEvent>((event, emit) {
       // TODO: implement event handler
     });
@@ -29,15 +32,16 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
       return result.fold((error) {
         print("🔴 Error while fetching profile: $error");
+        if (error is UnauthorizedFailure) {
+          return  add(LogoutEvent());
+        }
 
         emit(state.copyWith(
             getDataRequestState: RequestState.error, routeFailures: error));
       }, (result) {
         print("🟢 Profile fetched successfully");
         emit(state.copyWith(
-            getDataRequestState: RequestState.success,
-            authModel: result
-        ));
+            getDataRequestState: RequestState.success, authModel: result));
       });
     });
 
@@ -46,6 +50,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       var result = await addAddressUseCase.call(model: event.model);
       return result.fold((error) {
         print("🔴 Failed to add address: $error");
+        if (error is UnauthorizedFailure) {
+          return  add(LogoutEvent());
+        }
         emit(state.copyWith(
             addAddressRequestState: RequestState.error,
             addAddressFailures: error));
@@ -74,29 +81,41 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<GetAddresses>((event, emit) async {
       emit(state.copyWith(getAddressRequestState: RequestState.loading));
       var result = await addAddressUseCase.getAddress();
-
       return result.fold((error) {
-        print("🔴 Error while fetching addresses: $error");
 
+        print("🔴 Error while fetching addresses: $error");
+        if (error is UnauthorizedFailure) {
+        return  add(LogoutEvent());
+        }
         emit(state.copyWith(
             getAddressRequestState: RequestState.error,
             getAddressFailures: error));
       }, (result) {
-        print("🟢 Addresses fetched successfully (${result.data?.length ?? 0})");
+        print(
+            "🟢 Addresses fetched successfully (${result.data?.length ?? 0})");
         emit(state.copyWith(
             getAddressRequestState: RequestState.success,
-            addressModel: result
-        ));
+            addressModel: result));
       });
     });
 
+    on<LogoutEvent>((event, emit) async {
+      print("🔴 Unauthorized! Logging out user...");
+      final prefs = await SharedPrefsHelper.getInstance();
+      await prefs.clear();
+      print("old logout = ${state.isLoggedOut}");
+      emit(state.copyWith(isLoggedOut: true));
+      print("new logout = ${state.isLoggedOut}");
+    });
+
     on<DeleteAddressEvent>((event, emit) async {
-      emit(state.copyWith(
-          deleteAddressRequestState: RequestState.loading));
+      emit(state.copyWith(deleteAddressRequestState: RequestState.loading));
       var result = await deleteAddressUseCase.deleteAddress(event.id);
       return result.fold((error) {
         print("🔴 Failed to delete address: $error");
-
+        if (error is UnauthorizedFailure) {
+          return  add(LogoutEvent());
+        }
         emit(state.copyWith(
             deleteAddressRequestState: RequestState.error,
             deleteAddressFailures: error));
@@ -126,6 +145,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           name: event.name, email: event.email, phone: event.phone);
       return result.fold((error) {
         print("🔴 Error updating profile: $error");
+        if (error is UnauthorizedFailure) {
+          return  add(LogoutEvent());
+        }
         emit(state.copyWith(
             updateProfileRequestState: RequestState.error,
             updateProfileFailures: error));
@@ -135,9 +157,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
         emit(state.copyWith(
             updateProfileRequestState: RequestState.success,
-            authModel: result
-        )
-        );
+            authModel: result));
         final refreshResult = await profileUseCase.call();
         refreshResult.fold((err) {
           print("🔴 Error while refreshing data after update: $err");
@@ -157,21 +177,26 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     });
 
     on<ChangePasswordEvent>((event, emit) async {
-
       emit(state.copyWith(changePasswordRequestState: RequestState.loading));
       var result = await changePasswordUseCase.call(event.model);
 
       return result.fold((error) {
         print("🔴 Error while changing password: $error");
-
+        if (error is UnauthorizedFailure) {
+          return  add(LogoutEvent());
+        }
         emit(state.copyWith(
             changePasswordRequestState: RequestState.error,
             changePasswordFailures: error));
-      }, (result) {
+      }, (result) async{
         print("🟢 password changed successfully");
         emit(state.copyWith(
             changePasswordRequestState: RequestState.success,
-            authModel: result
-        ));
+            authModel: result));
+        final prefs = await SharedPrefsHelper.getInstance();
+        await prefs.clear();
+        emit(state.copyWith(isLoggedOut: true));
       });
-  });}}
+    });
+  }
+}

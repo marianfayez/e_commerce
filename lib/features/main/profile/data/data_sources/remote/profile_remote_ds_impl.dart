@@ -16,6 +16,26 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
 
   ProfileRemoteDsImpl(this.apiManager);
 
+  Future<String> _getToken() async {
+    final prefs = await SharedPrefsHelper.getInstance();
+    final token = prefs.getValue<String>('token');
+    if (token == null) throw Exception('User not logged in');
+    return token;
+  }
+
+  String _parseError(dynamic data) {
+    String message = 'Something went wrong';
+    if (data is Map<String, dynamic>) {
+      if (data.containsKey('errors') && data['errors'] is Map) {
+        final errors = data['errors'] as Map<String, dynamic>;
+        if (errors.containsKey('msg')) message = errors['msg'];
+      } else if (data.containsKey('message') && data['message'] is String) {
+        message = data['message'];
+      }
+    }
+    return message;
+  }
+
   @override
   Future<AuthModel> profile() async {
     try {
@@ -45,9 +65,7 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
   @override
   Future<AddressModel> addAddress({required AddressData model}) async {
     try {
-      //  print("📦 SENDING DATA TO API: name=$name, details=$details, phone=$phone, city=$city");
-      final prefs = await SharedPrefsHelper.getInstance();
-      final token = prefs.getValue<String>('token');
+      final token = await _getToken();
 
       var response = await apiManager
           .postData(EndPoints.addAddress, data: model.toJson(), headers: {
@@ -56,17 +74,15 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
       final addressModel = AddressModel.fromJson(response.data);
       return addressModel;
     } on DioException catch (e) {
-      final errorMessage = e.error?.toString() ?? 'Unknown error occurred';
-      throw Exception(
-          errorMessage); // or rethrow with ServerFailure if using Either
+      throw Exception(_parseError(
+          e.response?.data)); // or rethrow with ServerFailure if using Either
     }
   }
 
   @override
   Future<AddressModel> getAddresses() async {
     try {
-      final prefs = await SharedPrefsHelper.getInstance();
-      final token = prefs.getValue<String>('token');
+      final token = await _getToken();
 
       var response =
           await apiManager.getData(endPoint: EndPoints.addAddress, headers: {
@@ -79,15 +95,14 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
         throw Exception('Invalid response format');
       }
     } on DioException catch (e) {
-      throw Exception(e.error?.toString() ?? 'Unknown error occurred');
+      throw Exception(_parseError(e.response?.data));
     }
   }
 
   @override
   Future<AddressModel> deleteAddresses(String? id) async {
     try {
-      final prefs = await SharedPrefsHelper.getInstance();
-      final token = prefs.getValue<String>('token');
+      final token = await _getToken();
 
       var response =
           await apiManager.deleteRequest(EndPoints.deleteAddress(id), headers: {
@@ -99,23 +114,24 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
         throw Exception('Invalid response format');
       }
     } on DioException catch (e) {
-      final errorMessage = e.error?.toString() ?? 'Unknown error occurred';
-      throw Exception(
-          errorMessage); // or rethrow with ServerFailure if using Either
+      throw Exception(_parseError(e.response?.data));
     }
   }
 
   @override
-  Future<AuthModel> updateUserProfile({String? name, String? email, String? phone,}) async {
+  Future<AuthModel> updateUserProfile({
+    String? name,
+    String? email,
+    String? phone,
+  }) async {
     try {
       final prefs = await SharedPrefsHelper.getInstance();
       final token = prefs.getValue<String>('token');
       final currentName = prefs.getValue<String>('name');
       final currentEmail = prefs.getValue<String>('email');
-
       final Map<String, dynamic> body = {};
       if (currentName != null) body['name'] = name;
-      if (currentEmail != null && email !=currentEmail) {
+      if (currentEmail != null && email != currentEmail) {
         body['email'] = email;
       }
       if (body.isEmpty) {
@@ -126,7 +142,6 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
         "token": token,
       });
       final authModel = AuthModel.fromJson(response.data);
-
       return authModel;
     } on DioException catch (e) {
       String message = "Something went wrong";
@@ -150,10 +165,9 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
   }
 
   @override
-  Future<AuthModel> changePassword({required ChangePasswordModel model}) async{
+  Future<AuthModel> changePassword({required ChangePasswordModel model}) async {
     try {
-      final prefs = await SharedPrefsHelper.getInstance();
-      final token = prefs.getValue<String>('token');
+      final token = await _getToken();
       var response = await apiManager
           .putData(EndPoints.changeMyPassword, body: model.toJson(), headers: {
         "token": token,
@@ -161,9 +175,7 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
       final authModel = AuthModel.fromJson(response.data);
       return authModel;
     } on DioException catch (e) {
-      final errorMessage = e.error?.toString() ?? 'Unknown error occurred';
-      throw Exception(
-          errorMessage); // or rethrow with ServerFailure if using Either
+      throw Exception(_parseError(e.response?.data));
     }
   }
 }

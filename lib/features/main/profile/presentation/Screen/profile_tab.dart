@@ -36,19 +36,15 @@ class ProfileTabState extends State<ProfileTab> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
-
+  final TextEditingController currentPasswordController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController rePasswordController = TextEditingController();
   @override
   void dispose() {
     phoneController.dispose();
     addressController.dispose();
     super.dispose();
   }
-
-  // @override
-  // void dispose() {
-  //   addressController.dispose();
-  //   super.dispose();
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +53,17 @@ class ProfileTabState extends State<ProfileTab> {
         ..add(GetData())
         ..add(GetAddresses()),
       child: BlocConsumer<ProfileBloc, ProfileState>(
-        listener: (context, state) {
+        listener: (context, state) async {
+          if (state.isLoggedOut ==true) {
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text("Session expired. Please login again.")),
+            );
+
+            context.router.replaceAll([SignInRoute()]);
+            return;
+          }
           AppConstants.loadingDialog(
               context,
               state.getDataRequestState == RequestState.loading ||
@@ -366,34 +372,35 @@ class ProfileTabState extends State<ProfileTab> {
                                 FormFieldData(
                                   key: "currentPassword",
                                   label: "Current Password",
-                                  controller: TextEditingController(),
+                                  controller: currentPasswordController,
                                   isPassword: true,
                                 ),
                                 FormFieldData(
                                   key: "password",
                                   label: "New Password",
-                                  controller: TextEditingController(),
+                                  controller: passwordController,
                                   isPassword: true,
                                 ),
                                 FormFieldData(
                                   key: "rePassword",
                                   label: "Confirm Password",
-                                  controller: TextEditingController(),
+                                  controller: rePasswordController,
                                   isPassword: true,
                                   validator: (value) {
-                                    // هنا تقدري تعملي تطابق الباسورد
+                                    if (value != passwordController.text ) {
+                                      return "Passwords do not match!";
+                                    }
                                     return null;
                                   },
                                 ),
                               ],
-                              onSave: (values) {
+                              onSave: (values) async {
                                 context.read<ProfileBloc>().add(
                                       ChangePasswordEvent(
                                           model: ChangePasswordModel(
-                                        currentPassword:
-                                            values["currentPassword"]!,
-                                        password: values["password"]!,
-                                        rePassword: values["rePassword"]!,
+                                            currentPassword: currentPasswordController.text,
+                                            password: passwordController.text,
+                                            rePassword: rePasswordController.text,
                                       )),
                                     );
                               },

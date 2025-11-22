@@ -31,3 +31,5 @@ class ChangePasswordEvent extends ProfileEvent {
 
   ChangePasswordEvent({required this.model});
 }
+
+class LogoutEvent extends ProfileEvent {}
