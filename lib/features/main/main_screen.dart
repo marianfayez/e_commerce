@@ -2,12 +2,12 @@ import 'package:auto_route/annotations.dart';
 import 'package:e_commerce_app/core/resources/assets.gen.dart';
 import 'package:e_commerce_app/core/resources/color_manager.dart';
 import 'package:e_commerce_app/core/widgets/SharedSearchScaffold.dart';
-import 'package:e_commerce_app/core/widgets/home_screen_app_bar.dart';
 import 'package:e_commerce_app/di.dart';
 import 'package:e_commerce_app/features/main/categories/presentation/Screen/categories_tab.dart';
 import 'package:e_commerce_app/features/main/favorites/presentation/Screen/favorites_tab.dart';
 import 'package:e_commerce_app/features/main/home/presentation/Bloc/home_bloc.dart';
 import 'package:e_commerce_app/features/main/home/presentation/Screen/home_tab.dart';
+import 'package:e_commerce_app/features/main/profile/presentation/Bloc/profile_bloc.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/Screen/profile_tab.dart';
 import 'package:e_commerce_app/features/product_screen/presentation/bloc/product_screen_bloc.dart';
 import 'package:e_commerce_app/features/product_screen/presentation/bloc/product_screen_event.dart';
@@ -33,8 +33,11 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<HomeBloc>()..add(CategoriesEvent()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => getIt<HomeBloc>()..add(CategoriesEvent())),
+        BlocProvider(create: (_) => getIt<ProfileBloc>()..add(GetData())..add(GetAddresses())),
+      ],
       child: Scaffold(
         extendBody: false,
         body: SharedSearchScaffold(
