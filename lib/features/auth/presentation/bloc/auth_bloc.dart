@@ -9,42 +9,44 @@ import 'package:injectable/injectable.dart';
 import 'package:meta/meta.dart';
 
 part 'auth_event.dart';
+
 part 'auth_state.dart';
 
 @injectable
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   SignUpUseCases signUpUseCases;
   LogInUseCase logInUseCase;
-  AuthBloc(this.signUpUseCases,this.logInUseCase) : super(AuthInitial()) {
-    on<SignUpEvent>((event, emit) async{
 
+  AuthBloc(this.signUpUseCases, this.logInUseCase) : super(AuthInitial()) {
+    on<SignUpEvent>((event, emit) async {
       emit(state.copyWith(requestState: RequestState.loading));
 
       var result = await signUpUseCases.call(request: event.model);
-      return result.fold((error){
+      return result.fold((error) {
         print("error response");
-        emit(state.copyWith(requestState: RequestState.error,routeFailures: error));
-      }, (data){
+        emit(state.copyWith(
+            requestState: RequestState.error, routeFailures: error));
+      }, (data) {
         print("Success response");
-        emit(state.copyWith(requestState: RequestState.success,authModel: data));
-
+        emit(state.copyWith(
+            requestState: RequestState.success, authModel: data));
       });
     });
-    on<LogInEvent>((event, emit) async{
-
+    on<LogInEvent>((event, emit) async {
       emit(state.copyWith(logInRequestState: RequestState.loading));
 
-      var result = await logInUseCase.call(event.email,event.password);
-      return result.fold((error){
+      var result = await logInUseCase.call(event.email, event.password);
+      return result.fold((error) {
         print("error response");
         print(error);
-        emit(state.copyWith(logInRequestState: RequestState.error,routeFailures: error));
-      }, (data){
+        emit(state.copyWith(
+            logInRequestState: RequestState.error, routeFailures: error));
+      }, (data) {
         print("Success response");
-        emit(state.copyWith(logInRequestState: RequestState.success,authModel: data));
+        emit(state.copyWith(
+            logInRequestState: RequestState.success, authModel: data));
 
       });
     });
-
   }
 }

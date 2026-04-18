@@ -11,16 +11,23 @@ import 'package:e_commerce_app/core/widgets/main_text_field.dart';
 import 'package:e_commerce_app/core/widgets/validators.dart';
 import 'package:e_commerce_app/di.dart';
 import 'package:e_commerce_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:e_commerce_app/features/main/profile/presentation/Bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 @RoutePage()
-class SignInScreen extends StatelessWidget {
-  SignInScreen({super.key});
+class SignInScreen extends StatefulWidget {
+  const SignInScreen({super.key});
 
+  @override
+  State<SignInScreen> createState() => _SignInScreenState();
+}
+
+class _SignInScreenState extends State<SignInScreen> {
   var emailController = TextEditingController();
+
   var passwordController = TextEditingController();
 
   @override
@@ -52,8 +59,9 @@ class SignInScreen extends StatelessWidget {
                       ],
                     ));
           } else if (state.logInRequestState == RequestState.success) {
+            context.read<ProfileBloc>().add(GetData());
+            context.read<ProfileBloc>().add(GetAddresses());
             context.router.replaceAll([MainRoute()]);
-
           }
         },
         builder: (context, state) {
@@ -113,7 +121,9 @@ class SignInScreen extends StatelessWidget {
                         children: [
                           const Spacer(),
                           GestureDetector(
-                              onTap: () {},
+                              onTap: () {
+
+                              },
                               child: Text(
                                 'Forget password?',
                                 style: getMediumStyle(color: ColorManager.white)
