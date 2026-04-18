@@ -53,8 +53,9 @@ to ensure the code is testable and maintainable.
 <img src="assets/screenshots/home_screen.png" width="200" title="Home Screen">
 <img src="assets/screenshots/cart_screen.png" width="200" title="Cart Screen">
 <img src="assets/screenshots/favorite_tab.png" width="200" title="Cart Screen">
-<img src="assets/screenshots/product_details.png" width="200" title="Product Details">
 <img src="assets/screenshots/profile_tab.png" width="200" title="Product Details">
+<img src="assets/screenshots/product_details.png" width="200" title="Product Details">
+
 
 </p>
 ---
