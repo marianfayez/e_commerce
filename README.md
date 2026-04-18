@@ -31,11 +31,15 @@ This application is engineered with a focus on **Clean Architecture** (Data, Dom
 
 ## 📸 App Preview
 
-## 📸 App Preview
+<p align="center">
 
-| Login Screen | Home Screen | Cart Screen | Profile Screen |
-|:---:|:---:|:---:|:---:|
-| <img src="assets/screenshots/login.png" width="200"> | <img src="assets/screenshots/home.png" width="200"> | <img src="assets/screenshots/cart.png" width="200"> | <img src="assets/screenshots/profile.png" width="200"> |
+<img src="assets/screenshots/login.png" width="200" title="Login">
 
+<img src="assets/screenshots/home.png" width="200" title="Home Screen">
 
+<img src="assets/screenshots/cart.png" width="200" title="Cart Screen">
+
+<img src="assets/screenshots/product_details.png" width="200" title="Product Details">
+
+</p>
 ---
