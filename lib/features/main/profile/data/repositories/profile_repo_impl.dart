@@ -21,29 +21,25 @@ class ProfileRepoImpl implements ProfileRepo {
   RouteFailures _handleError(dynamic e) {
     print("🔥 Caught error: ${e.runtimeType}");
 
-    if (e is DioException ) {
-      final rawMsg = e.response?.data["message"] ?? "Something went wrong";
-      final msg = rawMsg.toString().toLowerCase().trim();
-      final status = e.response?.statusCode;
-      print("🔥 Server error message = $rawMsg");
-
-      if (status == 401 && msg.contains("user recently changed password")) {
-        return UnauthorizedFailure(rawMsg);
-      }
-
-      return RemoteFailures(rawMsg);
+    if (e is UnauthorizedException) {
+      return UnauthorizedFailure(e.message);
     }
-    if (e is Exception) {
-      final msg = e.toString().toLowerCase();
-      if (msg.contains("user recently changed password") ||
-          msg.contains("401")) {
-        return UnauthorizedFailure("Session expired! Please login again.");
+
+    if (e is ServerException) {
+      return RemoteFailures(e.message);
+    }
+
+    if (e is DioException) {
+      final msg = e.response?.data["message"] ?? "Something went wrong";
+
+      if (msg.toString().contains("does no longer exist")) {
+        return UnauthorizedFailure(msg);
       }
-      return RemoteFailures(e.toString());
+
+      return RemoteFailures(msg);
     }
 
     return RemoteFailures("Unexpected Error");
-
   }
 
   @override
@@ -95,9 +91,11 @@ class ProfileRepoImpl implements ProfileRepo {
     try {
       var result = await profileRemoteDs.updateUserProfile(name: name,email: email,phone: phone);
       final prefs = await SharedPrefsHelper.getInstance();
-      await prefs.setValue<String>('name', result.user?.name ?? '');
-      await prefs.setValue<String>('email', result.user?.email ?? '');
-      await prefs.setValue<String>('phone', result.user?.phone ?? phone ?? '');
+      if (result.user != null) {
+        await prefs.setValue<String>('name', result.user!.name ?? name ?? '');
+        await prefs.setValue<String>('email', result.user!.email ?? email ?? '');
+        await prefs.setValue<String>('phone', result.user!.phone ?? phone ?? '');
+      }
       return Right(result);
     } catch (e) {
       print("Parsing error: $e");

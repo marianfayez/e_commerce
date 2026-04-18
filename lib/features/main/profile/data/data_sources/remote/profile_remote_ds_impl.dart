@@ -1,10 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:e_commerce_app/core/api/api_manager.dart';
+import 'package:e_commerce_app/core/failuers/remote_failuers.dart';
 import 'package:e_commerce_app/core/resources/cache_helper.dart';
 import 'package:e_commerce_app/core/resources/endpoints.dart';
-import 'package:e_commerce_app/features/auth/data/data_sources/remote/auth_remote_ds.dart';
 import 'package:e_commerce_app/features/auth/data/models/auth_model.dart';
-import 'package:e_commerce_app/features/auth/data/models/sign_up_request_model.dart';
 import 'package:e_commerce_app/features/main/profile/data/data_sources/remote/profile_remote_ds.dart';
 import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
 import 'package:e_commerce_app/features/main/profile/data/models/changePassword.dart';
@@ -23,42 +22,28 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
     return token;
   }
 
-  String _parseError(dynamic data) {
-    String message = 'Something went wrong';
-    if (data is Map<String, dynamic>) {
-      if (data.containsKey('errors') && data['errors'] is Map) {
-        final errors = data['errors'] as Map<String, dynamic>;
-        if (errors.containsKey('msg')) message = errors['msg'];
-      } else if (data.containsKey('message') && data['message'] is String) {
-        message = data['message'];
-      }
-    }
-    return message;
-  }
-
   @override
   Future<AuthModel> profile() async {
     try {
+
       final prefs = await SharedPrefsHelper.getInstance();
 
       final token = prefs.getValue<String>('token');
-      final name = prefs.getValue<String>('name');
-      final email = prefs.getValue<String>('email');
-      final phone = prefs.getValue<String>('phone');
-      if (name == null || email == null || token == null) {
-        throw Exception('User data not found in local storage');
-      }
-      final user = User(name: name, email: email, phone: phone);
-      final authModel = AuthModel(
-        message: 'Profile loaded successfully (local)',
-        user: user,
+      String? name = prefs.getValue<String>('name');
+      String? email = prefs.getValue<String>('email');
+      String? phone = prefs.getValue<String>('phone');
+      print("Cache Check: $name, $email, $phone");
+      return AuthModel(
+        user: User(
+            name: name ?? "",
+            email: email ?? "",
+            phone: phone ?? ""
+        ),
         token: token,
       );
-      return authModel;
     } on DioException catch (e) {
-      final errorMessage = e.error?.toString() ?? 'Unknown error occurred';
-      throw Exception(
-          errorMessage); // or rethrow with ServerFailure if using Either
+      throw ServerException(e.toString());
+
     }
   }
 
@@ -73,9 +58,12 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
       });
       final addressModel = AddressModel.fromJson(response.data);
       return addressModel;
-    } on DioException catch (e) {
-      throw Exception(_parseError(
-          e.response?.data)); // or rethrow with ServerFailure if using Either
+    } on UnauthorizedException catch (e) {
+      rethrow;
+    } on ServerException catch (e) {
+      rethrow;
+    } catch (e) {
+      throw ServerException(e.toString());
     }
   }
 
@@ -95,7 +83,7 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
         throw Exception('Invalid response format');
       }
     } on DioException catch (e) {
-      throw Exception(_parseError(e.response?.data));
+      throw ServerException(e.toString());
     }
   }
 
@@ -114,7 +102,7 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
         throw Exception('Invalid response format');
       }
     } on DioException catch (e) {
-      throw Exception(_parseError(e.response?.data));
+      throw ServerException(e.toString());
     }
   }
 
@@ -125,6 +113,7 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
     String? phone,
   }) async {
     try {
+
       final prefs = await SharedPrefsHelper.getInstance();
       final token = prefs.getValue<String>('token');
       final currentName = prefs.getValue<String>('name');
@@ -160,7 +149,7 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
       }
       throw Exception(message);
     } catch (e) {
-      throw Exception(e.toString());
+      throw ServerException(e.toString());
     }
   }
 
@@ -175,7 +164,7 @@ class ProfileRemoteDsImpl implements ProfileRemoteDs {
       final authModel = AuthModel.fromJson(response.data);
       return authModel;
     } on DioException catch (e) {
-      throw Exception(_parseError(e.response?.data));
+      throw ServerException(e.toString());
     }
   }
 }

@@ -5,7 +5,6 @@ import 'package:e_commerce_app/core/resources/font_manager.dart';
 import 'package:e_commerce_app/core/resources/styles_manager.dart';
 import 'package:e_commerce_app/core/routes/auto_route.gr.dart';
 import 'package:e_commerce_app/core/widgets/custom_elevated_button.dart';
-import 'package:e_commerce_app/di.dart';
 import 'package:e_commerce_app/features/main/profile/data/models/address_model.dart';
 import 'package:e_commerce_app/features/main/profile/data/models/changePassword.dart';
 import 'package:e_commerce_app/features/main/profile/presentation/Bloc/profile_bloc.dart';
@@ -26,10 +25,9 @@ class ProfileTab extends StatefulWidget {
 }
 
 class ProfileTabState extends State<ProfileTab>
-  with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-
   bool isFullNameReadOnly = true;
   bool isEmailReadOnly = true;
   bool isPasswordReadOnly = true;
@@ -40,9 +38,25 @@ class ProfileTabState extends State<ProfileTab>
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController currentPasswordController = TextEditingController();
+  final TextEditingController currentPasswordController =
+      TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController rePasswordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final bloc = context.read<ProfileBloc>();
+
+    if (bloc.state.authModel == null) {
+      bloc.add(GetData());
+    }
+
+    if (bloc.state.addressModel == null) {
+      bloc.add(GetAddresses());
+    }
+  }
+
   @override
   void dispose() {
     phoneController.dispose();
@@ -52,10 +66,30 @@ class ProfileTabState extends State<ProfileTab>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return BlocConsumer<ProfileBloc, ProfileState>(
       listener: (context, state) async {
-        if (state.isLoggedOut ==true) {
-
+        if (state.getDataRequestState == RequestState.success) {
+          nameController.text = state.authModel?.user?.name ?? "";
+          emailController.text = state.authModel?.user?.email ?? "";
+          if (state.authModel?.user?.phone != null && state.authModel!.user!.phone!.isNotEmpty) {
+            phoneController.text = state.authModel!.user!.phone!;
+          }
+        }
+        if (state.addressModel?.data != null &&
+            state.addressModel!.data!.isNotEmpty &&
+            state.addressModel!.data!.any((address) => address.id != null)) {
+          if (phoneController.text.isEmpty) {
+            phoneController.text = state.addressModel!.data!.first.phone ?? "";
+          }
+          final validAddress = state.addressModel!.data!.firstWhere(
+              (address) => address.id != null,
+              orElse: () => state.addressModel!.data!.first);
+          addressController.text = selectedAddressText.isNotEmpty
+              ? selectedAddressText
+              : validAddress.details ?? '';
+        }
+        if (state.isLoggedOut == true) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
                 content: Text("Session expired. Please login again.")),
@@ -90,18 +124,13 @@ class ProfileTabState extends State<ProfileTab>
         }
       },
       builder: (context, state) {
-        phoneController.text = state.authModel?.user?.phone ?? "";
-        nameController.text = state.authModel?.user?.name ?? "";
-        emailController.text = state.authModel?.user?.email ?? "";
-        if (state.addressModel?.data != null &&
-            state.addressModel!.data!.isNotEmpty &&
-            state.addressModel!.data!.any((address) => address.id != null)) {
-          final validAddress = state.addressModel!.data!.firstWhere(
-              (address) => address.id != null,
-              orElse: () => state.addressModel!.data!.first);
-          addressController.text = selectedAddressText.isNotEmpty
-              ? selectedAddressText
-              : validAddress.details ?? '';
+        if (nameController.text.isEmpty && state.authModel?.user?.name != null) {
+          nameController.text = state.authModel?.user?.name ?? "";
+          emailController.text = state.authModel?.user?.email ?? "";
+        }
+
+        if (phoneController.text.isEmpty && state.addressModel?.data != null && state.addressModel!.data!.isNotEmpty) {
+          phoneController.text = state.addressModel!.data!.first.phone ?? "";
         }
         return Padding(
           padding: const EdgeInsets.all(20),
@@ -110,14 +139,6 @@ class ProfileTabState extends State<ProfileTab>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // SvgPicture.asset(
-                  //   SvgAssets.routeLogo,
-                  //   height: 40.h,
-                  //   colorFilter: ColorFilter.mode(
-                  //     ColorManager.primary,
-                  //     BlendMode.srcIn,
-                  //   ),
-                  // ),
                   SizedBox(height: 20.h),
                   Text(
                     state.authModel?.user?.name ?? "",
@@ -222,8 +243,8 @@ class ProfileTabState extends State<ProfileTab>
                             },
                             profileBloc: blocContext.read<ProfileBloc>(),
                             addresses: validAddresses,
-                            onSave: (String name, String details,
-                                String phone, String city) {
+                            onSave: (String name, String details, String phone,
+                                String city) {
                               blocContext.read<ProfileBloc>().add(AddAddress(
                                   AddressData(
                                       name: name,
@@ -238,8 +259,8 @@ class ProfileTabState extends State<ProfileTab>
                           context: blocContext,
                           isScrollControlled: true,
                           shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(20)),
+                            borderRadius:
+                                BorderRadius.vertical(top: Radius.circular(20)),
                           ),
                           builder: (_) => SingleChildScrollView(
                             child: CustomFormSheet(
@@ -264,9 +285,7 @@ class ProfileTabState extends State<ProfileTab>
                                     controller: TextEditingController()),
                               ],
                               onSave: (values) {
-                                blocContext
-                                    .read<ProfileBloc>()
-                                    .add(AddAddress(
+                                blocContext.read<ProfileBloc>().add(AddAddress(
                                       AddressData(
                                         name: values["name"]!,
                                         details: values["details"]!,
@@ -286,9 +305,8 @@ class ProfileTabState extends State<ProfileTab>
                     children: [
                       Expanded(
                         child: CustomElevatedButton(
-                          label: isFullNameReadOnly
-                              ? 'Update Profile'
-                              : 'Cancel',
+                          label:
+                              isFullNameReadOnly ? 'Update Profile' : 'Cancel',
                           onTap: () {
                             setState(() {
                               final editing = isFullNameReadOnly;
@@ -387,7 +405,7 @@ class ProfileTabState extends State<ProfileTab>
                                 controller: rePasswordController,
                                 isPassword: true,
                                 validator: (value) {
-                                  if (value != passwordController.text ) {
+                                  if (value != passwordController.text) {
                                     return "Passwords do not match!";
                                   }
                                   return null;
@@ -398,9 +416,10 @@ class ProfileTabState extends State<ProfileTab>
                               context.read<ProfileBloc>().add(
                                     ChangePasswordEvent(
                                         model: ChangePasswordModel(
-                                          currentPassword: currentPasswordController.text,
-                                          password: passwordController.text,
-                                          rePassword: rePasswordController.text,
+                                      currentPassword:
+                                          currentPasswordController.text,
+                                      password: passwordController.text,
+                                      rePassword: rePasswordController.text,
                                     )),
                                   );
                             },

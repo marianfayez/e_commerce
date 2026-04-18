@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:e_commerce_app/core/failuers/remote_failuers.dart';
 import 'package:e_commerce_app/core/resources/constants_manager.dart';
 import 'package:injectable/injectable.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
@@ -75,7 +76,6 @@ class ApiManager {
           errorMessage = errorData['message'];
         }
 
-        // Check if there's a nested 'errors' object
         if (errorData.containsKey('errors') && errorData['errors'] is Map) {
           final nested = errorData['errors'];
           if (nested is Map<String, dynamic> && nested.containsKey('msg')) {
@@ -84,13 +84,12 @@ class ApiManager {
           }
         }
       }
+      if (errorMessage.contains("does no longer exist")) {
+        throw UnauthorizedException(errorMessage);
+      }
 
-      throw DioException(
-        requestOptions: e.requestOptions,
-        response: e.response,
-        type: e.type,
-        error: errorMessage,
-      );
+      throw ServerException(errorMessage);
+
     }
   }
 
@@ -143,13 +142,12 @@ class ApiManager {
           }
         }
       }
+      if (errorMessage.contains("does no longer exist")) {
+        throw UnauthorizedException(errorMessage);
+      }
 
-      throw DioException(
-        requestOptions: e.requestOptions,
-        response: e.response,
-        type: e.type,
-        error: errorMessage,
-      );
+      throw ServerException(errorMessage);
+
     }
   }
 }

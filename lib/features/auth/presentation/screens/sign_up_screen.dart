@@ -23,13 +23,22 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 @RoutePage()
-class SignUpScreen extends StatelessWidget {
-  SignUpScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
+  @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
   var nameController = TextEditingController();
+
   var emailController = TextEditingController();
+
   var passwordController = TextEditingController();
+
   var mobileController = TextEditingController();
+
   var rePasswordController = TextEditingController();
 
   @override
@@ -160,6 +169,7 @@ class SignUpScreen extends StatelessWidget {
                                   email: emailController.text);
                               BlocProvider.of<AuthBloc>(context)
                                   .add(SignUpEvent(model));
+
                             },
                           ),
                         ),
