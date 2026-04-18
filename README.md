@@ -13,6 +13,8 @@ A robust, full-featured E-Commerce mobile application built with **Flutter**. Th
 * **Product Details:** Deep-dive into products with rating systems, quantity selectors, and image galleries.
 * **Search & Filter:** Global search functionality to find products quickly across the app.
 * **Responsive Layout:** Pixel-perfect UI designed for various screen sizes using `flutter_screenutil`.
+* **User Profile:** View and update personal information (Name, Email, Phone) with local data persistence. 
+* **Address Management:** Add and browse multiple shipping addresses with seamless API integration.
 
 ---
 
@@ -24,7 +26,7 @@ This application is engineered with a focus on **Clean Architecture** (Data, Dom
 * **Networking:** [Dio](https://pub.dev/packages/dio) with interceptors for API calls and error handling.
 * **Navigation:** [AutoRoute](https://pub.dev/packages/auto_route) for declarative, strongly-typed routing.
 * **Data Handling:** [Dartz](https://pub.dev/packages/dartz) for Functional Programming (Either Left/Right) error handling.
-
+* **Design Patterns:** Implementation of Repository Pattern, Use Cases, and Data Sources for complete separation of concerns.
 ---
 
 ## 📸 App Preview
